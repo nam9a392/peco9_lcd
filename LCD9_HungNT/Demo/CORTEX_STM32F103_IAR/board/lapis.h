@@ -26,6 +26,8 @@
 #include  "sysSetting.h"
 #include  "utility.h"
 #include  "listcode.h"
+
+extern  volatile u8                      aDecimalBuffer[3];
 #define		DATA_LOW		GPIO_WriteBit(KB_DATAOUT_PORT,KB_DATAOUT_PIN,Bit_RESET);
 #define		DATA_HIGH		GPIO_WriteBit(KB_DATAOUT_PORT,KB_DATAOUT_PIN,Bit_SET);
 #define		CLOCK_LOW		GPIO_WriteBit(KB_CLOCK_PORT,KB_CLOCK_PIN,Bit_RESET);

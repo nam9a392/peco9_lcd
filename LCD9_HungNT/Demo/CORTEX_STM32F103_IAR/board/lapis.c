@@ -565,9 +565,9 @@ void vLcdTask(void * pvParameters)
   //LCD_Test();
   while(1)
   {
-    if((bKeypadEnable==TRUE) && (bSinalPFL==FALSE))
+    if((bKeypadEnable==TRUE) && (bSinalPFL==FALSE))                                                              
     {
-      if(Mode==SUNNYXE_PRESET)
+      if(Mode==SUNNYXE_PRESET) // pumpsetting on main display
       {
         u8  cntTotal=0;        
         do
@@ -798,14 +798,14 @@ void vLcdTask(void * pvParameters)
                         uCntC=0;
                         bGoToReadMode=TRUE;                                     
                         Mode=SUNNYXE_CODE;    
-                        LCD_Default(); 
-                        LAPIS_DisplayCode(); 
+                        LCD_Default();       // print "Peco" in preset lcd
+                        LAPIS_DisplayCode(); // print CodE in col|row = 0|2
                         TIMER4_DISABLE();
                       }                                             
                       Reset_Buffer_Keypad();
                     }                      
                   }
-                  else if(uDataLeng==5)
+                  else if(uDataLeng==5) // why do max input buffer size has to be 5 ?????
                   {                  
                     Reset_Buffer_Keypad();
                   }                    
@@ -814,12 +814,12 @@ void vLcdTask(void * pvParameters)
           }
         }while(Mode==SUNNYXE_PRESET);					
       }
-      else if(Mode==SUNNYXE_CODE)
+      else if(Mode==SUNNYXE_CODE) // pumpsetting check pass
       {
         do
         {
           if(xQueueReceive(xKeypadQueue, &xMessageButton,(TickType_t)2))
-          {
+          {                                         
             //bEnableLCDStatusDisplay=TRUE;
             cKEY=xMessageButton.cMessageValue;
             if(cKEY=='X')
@@ -871,7 +871,7 @@ void vLcdTask(void * pvParameters)
           }
         }while(Mode==SUNNYXE_CODE);
       }  
-      else if(Mode==SUNNYXE_PRINT)
+      else if(Mode==SUNNYXE_PRINT) // printersetting
       {
         cKEY=0;
          bool   bGoPrinterMode=FALSE;
@@ -1939,48 +1939,48 @@ bool SUNNYXE_SaveData( volatile SysConfig_t *config,uint64_t intValue,u8 pcode,u
           }
         }        
         break;
-//      case 37:
-//        data.dataArr[0]=config->DecimalPlace.Amount;data.dataArr[1]=config->DecimalPlace.Volume;data.dataArr[2]=config->DecimalPlace.UnitPrice;
-//        if(config->DecimalPlace.Amount!=aDecimalBuffer[0])
-//        {
-//           saveEnable=TRUE;
-//           data.dataArr[0]=aDecimalBuffer[0];        
-//        }
-//        if(config->DecimalPlace.Volume!=aDecimalBuffer[1])
-//        {
-//           saveEnable=TRUE;
-//           data.dataArr[1]=aDecimalBuffer[1];
-//        }   
-//        if(config->DecimalPlace.UnitPrice!=aDecimalBuffer[2])
-//        {
-//           saveEnable=TRUE;
-//           data.dataArr[2]=aDecimalBuffer[2];
-//        } 
-//        if(saveEnable==TRUE)
-//        {  
-//          data.code=37;
-//          if(WaitTransmitDone(&data,TRUE)==TRUE)          
-//          {
-//            saveDone=TRUE;
-//            taskEXIT_CRITICAL();
-//            if(config->DecimalPlace.Amount!=aDecimalBuffer[0])config->DecimalPlace.Amount=aDecimalBuffer[0]; 
-//            if(config->DecimalPlace.Volume!=aDecimalBuffer[1])
+     case 37:
+       data.dataArr[0]=config->DecimalPlace.Amount;data.dataArr[1]=config->DecimalPlace.Volume;data.dataArr[2]=config->DecimalPlace.UnitPrice;
+       if(config->DecimalPlace.Amount!=aDecimalBuffer[0])
+       {
+          saveEnable=TRUE;
+          data.dataArr[0]=aDecimalBuffer[0];        
+       }
+       if(config->DecimalPlace.Volume!=aDecimalBuffer[1])
+       {
+          saveEnable=TRUE;
+          data.dataArr[1]=aDecimalBuffer[1];
+       }   
+       if(config->DecimalPlace.UnitPrice!=aDecimalBuffer[2])
+       {
+          saveEnable=TRUE;
+          data.dataArr[2]=aDecimalBuffer[2];
+       } 
+       if(saveEnable==TRUE)
+       {  
+         data.code=37;
+         if(WaitTransmitDone(&data,TRUE)==TRUE)          
+         {
+           saveDone=TRUE;
+           taskEXIT_CRITICAL();
+           if(config->DecimalPlace.Amount!=aDecimalBuffer[0])config->DecimalPlace.Amount=aDecimalBuffer[0]; 
+           if(config->DecimalPlace.Volume!=aDecimalBuffer[1])
+           {
+             config->DecimalPlace.Volume=aDecimalBuffer[1];
+//              if(Mode==SUNNYXE_ADMIN)
+//                bChangeDecimalAdminMode=TRUE;
+           }
+           if(config->DecimalPlace.UnitPrice!=aDecimalBuffer[2])config->DecimalPlace.UnitPrice=aDecimalBuffer[2];    
+//            if(Mode==SUNNYXE_OILCOMP)
 //            {
-//              config->DecimalPlace.Volume=aDecimalBuffer[1];
-////              if(Mode==SUNNYXE_ADMIN)
-////                bChangeDecimalAdminMode=TRUE;
+//              sDecimal.Amount=config->DecimalPlace.Amount;
+//              sDecimal.UnitPrice=config->DecimalPlace.UnitPrice;
+//              sDecimal.Volume=config->DecimalPlace.Volume;
 //            }
-//            if(config->DecimalPlace.UnitPrice!=aDecimalBuffer[2])config->DecimalPlace.UnitPrice=aDecimalBuffer[2];    
-////            if(Mode==SUNNYXE_OILCOMP)
-////            {
-////              sDecimal.Amount=config->DecimalPlace.Amount;
-////              sDecimal.UnitPrice=config->DecimalPlace.UnitPrice;
-////              sDecimal.Volume=config->DecimalPlace.Volume;
-////            }
-//            taskEXIT_CRITICAL();
-//          }
-//        }         
-//        break;       
+           taskEXIT_CRITICAL();
+         }
+       }         
+       break;       
       case 41:
         if((config->PresetSlowdownPosition.F[cntScode-1]!=intValue)&&(intValue>=1)&&(intValue<=20)){
           saveEnable=TRUE;      
@@ -2225,7 +2225,12 @@ void Change_Values(eLoginMode_t mode,u8 arr[])
 {
   /*Select code*/
   if( bSelectCode==TRUE && bChangecode_SunnyPeco==FALSE)//just clear CCC;uCntPcode==0
-  {
+  { 
+    /*
+    *  - get input data as processcode
+    *  - convert string buffer into interget value
+    *  - jump to setting corressponding getting processcode
+    */
     if(uProcessCodeLeng<2)
     {
       eTypeRead_Select=SELECT;

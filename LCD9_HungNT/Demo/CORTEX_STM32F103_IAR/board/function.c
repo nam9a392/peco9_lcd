@@ -17,13 +17,14 @@
 #include        "lapis.h"
 #include        "math.h"
 
-
+                            /* 0 ,  1,   2,   3,   4,   5,   6,   7,   8,   9,   A,   F    L,   C,   E,   P,   b,   d*/
 u8	        uSegDigits[18]={0x3F,0x06,0x5B,0x4F,0x66,0x6D,0x7D,0x07,0x7F,0x6F,0x77,0x71,0x38,0x39,0x79,0x73,0x7c,0x5e};
-u8              uSegErrorList[15]={0x3F,0x06,0x5B,0x4F,0x66,0x6D,0x7D,0x07,0x7F,0x6F,0xFF,0xFF, 0x39,0x5E,0x79};
+                            /* 0 ,  1,   2,   3,   4,   5,   6,   7,   8,   9,              C,   d,   E*/
+u8       uSegErrorList[15]={0x3F,0x06,0x5B,0x4F,0x66,0x6D,0x7D,0x07,0x7F,0x6F,0xFF,0xFF, 0x39,0x5E,0x79};
 volatile TypeValue_t                     sTypeValues;
 volatile u8                     uPresetValue=2;
 extern  volatile SysConfig_t             sConfiguration;
-//extern  volatile u8                      aDecimalBuffer[3];
+volatile u8                      aDecimalBuffer[3];
 extern  volatile  u8            uLengTphan;
 extern  u8                      uCntScode;
 extern volatile u8              uLengCalender;
@@ -95,14 +96,14 @@ void 	LAPIS_WaitCodeState(void)
 void	LAPIS_WaitPasswordState(u8 leng)
 {
   u8	i;
-  LAPIS_DisplayNumber(0x79);
-  LAPIS_DisplayNumber(0x5E);
-  LAPIS_DisplayNumber(0x5C);
-  LAPIS_DisplayNumber(0x39);
-  LAPIS_ClearSegment(21);
+  LAPIS_DisplayNumber(0x79); // 'E'
+  LAPIS_DisplayNumber(0x5E); // 'd'
+  LAPIS_DisplayNumber(0x5C); // 'o'
+  LAPIS_DisplayNumber(0x39); // 'C'
+  LAPIS_ClearSegment(21);    // reserve 21 digits
   for(i=leng;i>0;i--)
   {
-    LAPIS_DisplayNumber(0x40);
+    LAPIS_DisplayNumber(0x40); // '-'
   }
   LAPIS_ClearSegment(98-7*leng);
   LATCH();
@@ -450,7 +451,10 @@ void    LAPIS_DisplaySetup(eLoginMode_t mode,u8 pcode,u8 cntSub, u8 dot)
         fDisplay24(pcode,tScode,value,dot,cntSub,uPresetValue);
         break; 
       case 37:
-        bReadOnly=TRUE;//if(pcode==37 && (mode==SUNNYXE_ADMIN))
+        if(pcode==37 && (mode==SUNNYXE_ADMIN))
+        {
+          bReadOnly=TRUE;//if(pcode==37 && (mode==SUNNYXE_ADMIN))
+        }
         fDisplay37(cntSub);
       break;
       case 41:
@@ -671,9 +675,9 @@ void LAPIS_ChangeValue(u8 pcode,u8 cntSub,TypeValue_t tValue,u8 dot,u8 sizefield
       if(pcode==12||pcode==16||pcode==41||pcode==63||pcode==95)valueDbOrInt=FALSE;
         fDisplay(pcode,tScode,tValue,dot,valueDbOrInt,sizefield);  //getSizeFieldDataChange(pcode,cntSub)
       break; 
-//    case 37:
-//      fDisplay37(cntSub);
-//      break;
+   case 37:
+     fDisplay37(cntSub);
+     break;
   }
 }
 
@@ -1614,7 +1618,7 @@ void fDisplay37(u8 row)
     {
       //sfRow1(37,sConfiguration.DecimalPlace.UnitPrice);  
       sfRow1(37,0); 
-      LAPIS_DisplayNumber(uSegDigits[3]);      //sConfiguration.DecimalPlace.Volume
+      LAPIS_DisplayNumber(uSegDigits[sConfiguration.DecimalPlace.UnitPrice]);      //sConfiguration.DecimalPlace.Volume
       LAPIS_ClearSegment(42);   
       LAPIS_DisplayNumber(uSegDigits[0]); //aDecimalBuffer[0]
       LAPIS_DisplayNumber(0x08);
@@ -1623,7 +1627,7 @@ void fDisplay37(u8 row)
     else if(row==2)//volume
     {
       sfRow1(37,0);
-      LAPIS_DisplayNumber(uSegDigits[3]);  //aDecimalBuffer[1]
+      LAPIS_DisplayNumber(uSegDigits[sConfiguration.DecimalPlace.Volume]);  //aDecimalBuffer[1]
       LAPIS_DisplayNumber(0x08);      
       LAPIS_ClearSegment(35);   
       LAPIS_DisplayNumber(uSegDigits[0]); 
@@ -1631,7 +1635,7 @@ void fDisplay37(u8 row)
     }
     else if(row==3)
     {
-      Row3(uSegDigits[3],uSegDigits[7],0x08,uSegDigits[0]);
+      Row3(uSegDigits[3],uSegDigits[7],0x08,uSegDigits[sConfiguration.DecimalPlace.Amount]);
       LAPIS_DisplayNumber(uSegDigits[3]);       
       LAPIS_ClearSegment(42);   
       LAPIS_DisplayNumber(uSegDigits[0]); 

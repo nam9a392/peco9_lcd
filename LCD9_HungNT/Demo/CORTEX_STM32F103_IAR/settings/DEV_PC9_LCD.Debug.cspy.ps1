@@ -23,9 +23,9 @@
 
 if ($debugfile -eq "")
 {
-& "C:\Program Files (x86)\IAR Systems\Embedded Workbench 8.0\common\bin\cspybat" -f "F:\NamNote\reference\LCD9_HungNT\Demo\CORTEX_STM32F103_IAR\settings\DEV_PC9_LCD.Debug.general.xcl" --backend -f "F:\NamNote\reference\LCD9_HungNT\Demo\CORTEX_STM32F103_IAR\settings\DEV_PC9_LCD.Debug.driver.xcl" 
+& "C:\Program Files (x86)\IAR Systems\Embedded Workbench 8.0\common\bin\cspybat" -f "F:\NamNote\reference\peco9_lcd\LCD9_HungNT\Demo\CORTEX_STM32F103_IAR\settings\DEV_PC9_LCD.Debug.general.xcl" --backend -f "F:\NamNote\reference\peco9_lcd\LCD9_HungNT\Demo\CORTEX_STM32F103_IAR\settings\DEV_PC9_LCD.Debug.driver.xcl" 
 }
 else
 {
-& "C:\Program Files (x86)\IAR Systems\Embedded Workbench 8.0\common\bin\cspybat" -f "F:\NamNote\reference\LCD9_HungNT\Demo\CORTEX_STM32F103_IAR\settings\DEV_PC9_LCD.Debug.general.xcl" --debug_file=$debugfile --backend -f "F:\NamNote\reference\LCD9_HungNT\Demo\CORTEX_STM32F103_IAR\settings\DEV_PC9_LCD.Debug.driver.xcl" 
+& "C:\Program Files (x86)\IAR Systems\Embedded Workbench 8.0\common\bin\cspybat" -f "F:\NamNote\reference\peco9_lcd\LCD9_HungNT\Demo\CORTEX_STM32F103_IAR\settings\DEV_PC9_LCD.Debug.general.xcl" --debug_file=$debugfile --backend -f "F:\NamNote\reference\peco9_lcd\LCD9_HungNT\Demo\CORTEX_STM32F103_IAR\settings\DEV_PC9_LCD.Debug.driver.xcl" 
 }
