@@ -451,10 +451,13 @@ void    LAPIS_DisplaySetup(eLoginMode_t mode,u8 pcode,u8 cntSub, u8 dot)
         fDisplay24(pcode,tScode,value,dot,cntSub,uPresetValue);
         break; 
       case 37:
-        if(pcode==37 && (mode==SUNNYXE_ADMIN))
-        {
-          bReadOnly=TRUE;//if(pcode==37 && (mode==SUNNYXE_ADMIN))
-        }
+//        if(pcode==37 && (mode==SUNNYXE_ADMIN))
+//        {
+          // bReadOnly=TRUE;//if(pcode==37 && (mode==SUNNYXE_ADMIN))
+//        }
+        aDecimalBuffer[0] = sConfiguration.DecimalPlace.Amount;
+        aDecimalBuffer[1] = sConfiguration.DecimalPlace.Volume;
+        aDecimalBuffer[2] = sConfiguration.DecimalPlace.UnitPrice;
         fDisplay37(cntSub);
       break;
       case 41:
@@ -535,7 +538,8 @@ TypeValue_t   setValue( eLoginMode_t mode,u8 pcode,u8 cntSub,double value,u8 len
         case 30:
         case 32:
         case 33:
-        case 36:  
+        case 36:
+         
         case 44:
         case 45:
         case 46:
@@ -554,7 +558,23 @@ TypeValue_t   setValue( eLoginMode_t mode,u8 pcode,u8 cntSub,double value,u8 len
         case 99:          
            tValue.db=value;
            break;
-
+      case 37: 
+      {
+          switch (cntSub)
+          {
+            case 1:
+                aDecimalBuffer[0]=(u8)value;
+                break;
+            case 2:
+                aDecimalBuffer[1]=(u8)value;
+                break;
+            case 3:
+                aDecimalBuffer[2]=(u8)value;
+              break;
+            default:
+              break;
+          }
+      }
       case 24:
       if(cntSub==1)
       {
@@ -1617,28 +1637,28 @@ void fDisplay37(u8 row)
     if(row==1)//Amount
     {
       //sfRow1(37,sConfiguration.DecimalPlace.UnitPrice);  
-      sfRow1(37,0); 
-      LAPIS_DisplayNumber(uSegDigits[sConfiguration.DecimalPlace.UnitPrice]);      //sConfiguration.DecimalPlace.Volume
+      sfRow1(37,aDecimalBuffer[2]); 
+      LAPIS_DisplayNumber(uSegDigits[aDecimalBuffer[1]]);      //sConfiguration.DecimalPlace.Volume
       LAPIS_ClearSegment(42);   
-      LAPIS_DisplayNumber(uSegDigits[0]); //aDecimalBuffer[0]
+      LAPIS_DisplayNumber(uSegDigits[aDecimalBuffer[0]]); //sConfiguration.DecimalPlace.Amount
       LAPIS_DisplayNumber(0x08);
       LAPIS_ClearSegment(35);         
     }
     else if(row==2)//volume
     {
-      sfRow1(37,0);
-      LAPIS_DisplayNumber(uSegDigits[sConfiguration.DecimalPlace.Volume]);  //aDecimalBuffer[1]
+      sfRow1(37,aDecimalBuffer[2]);
+      LAPIS_DisplayNumber(uSegDigits[aDecimalBuffer[1]]);  //aDecimalBuffer[1]
       LAPIS_DisplayNumber(0x08);      
       LAPIS_ClearSegment(35);   
-      LAPIS_DisplayNumber(uSegDigits[0]); 
+      LAPIS_DisplayNumber(uSegDigits[aDecimalBuffer[0]]); 
       LAPIS_ClearSegment(42);        
     }
     else if(row==3)
     {
-      Row3(uSegDigits[3],uSegDigits[7],0x08,uSegDigits[sConfiguration.DecimalPlace.Amount]);
-      LAPIS_DisplayNumber(uSegDigits[3]);       
+      Row3(uSegDigits[3],uSegDigits[7],0x08,uSegDigits[aDecimalBuffer[2]]);
+      LAPIS_DisplayNumber(uSegDigits[aDecimalBuffer[1]]);       
       LAPIS_ClearSegment(42);   
-      LAPIS_DisplayNumber(uSegDigits[0]); 
+      LAPIS_DisplayNumber(uSegDigits[aDecimalBuffer[0]]); 
       LAPIS_ClearSegment(42);     
     }             
   LATCH();

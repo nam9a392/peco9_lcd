@@ -559,9 +559,9 @@ void vLcdTask(void * pvParameters)
   u8      aCodeReadMode[Size_Array_ReadMode]={1,2,3,8};
   xQueueMessage   xMessageButton;
   LCD_Initial();
-  sConfiguration.DecimalPlace.Amount=0;
-  sConfiguration.DecimalPlace.Volume=3;
-  sConfiguration.DecimalPlace.UnitPrice=0;
+//  sConfiguration.DecimalPlace.Amount=0;
+//  sConfiguration.DecimalPlace.Volume=3;
+//  sConfiguration.DecimalPlace.UnitPrice=0;
   //LCD_Test();
   while(1)
   {
@@ -1962,13 +1962,13 @@ bool SUNNYXE_SaveData( volatile SysConfig_t *config,uint64_t intValue,u8 pcode,u
          if(WaitTransmitDone(&data,TRUE)==TRUE)          
          {
            saveDone=TRUE;
-           taskEXIT_CRITICAL();
+           taskENTER_CRITICAL();
            if(config->DecimalPlace.Amount!=aDecimalBuffer[0])config->DecimalPlace.Amount=aDecimalBuffer[0]; 
            if(config->DecimalPlace.Volume!=aDecimalBuffer[1])
            {
              config->DecimalPlace.Volume=aDecimalBuffer[1];
-//              if(Mode==SUNNYXE_ADMIN)
-//                bChangeDecimalAdminMode=TRUE;
+            //  if(Mode==SUNNYXE_ADMIN)
+            //    bChangeDecimalAdminMode=TRUE;
            }
            if(config->DecimalPlace.UnitPrice!=aDecimalBuffer[2])config->DecimalPlace.UnitPrice=aDecimalBuffer[2];    
 //            if(Mode==SUNNYXE_OILCOMP)

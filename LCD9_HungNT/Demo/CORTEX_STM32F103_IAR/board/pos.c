@@ -278,9 +278,10 @@ void POS_UpdateConfig(u8* ptr,volatile SysConfig_t     *config)
   config->Version.versionLcd=LCD_Version;
   sTypeValues.len_tp[0]=3;//config->DecimalPlace.Volume;
   sTypeValues.len_tp[1]=3;//config->DecimalPlace.Volume; 
-  config->DecimalPlace.Amount = dtFrame.DecimalPlace.uAmount[1];
-  config->DecimalPlace.Volume = dtFrame.DecimalPlace.uVolume[1];
-  config->DecimalPlace.UnitPrice = dtFrame.DecimalPlace.uPrice[1];
+  
+   config->DecimalPlace.Amount = stringToInt(dtFrame.DecimalPlace.uAmount,1);
+   config->DecimalPlace.Volume = stringToInt(dtFrame.DecimalPlace.uVolume,1);
+   config->DecimalPlace.UnitPrice = stringToInt(dtFrame.DecimalPlace.uPrice,1);
 
   config->PosVersion= stringToInt(dtFrame.PosVersion,1);
   config->UAV.uUPLossPower=stringToInt(dtFrame.UAV.uUPLossPower,6);
