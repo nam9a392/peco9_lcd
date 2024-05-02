@@ -151,7 +151,7 @@ void LCD_ReadTotal(u8 cnt,uint64_t amount,double volume)//,SysConfig_t     *conf
   else  LCD_DisplayFollowLanguage( 1,0,1,0,"Tong ngay:","Total Day:" );
 
   LCD_DisplayAmount(amount,2,1,2,12,TRUE);
-  LCD_DisplayVolume(3,3,1,3,12,volume,TRUE);//sConfiguration.DecimalPlace.Volume
+  LCD_DisplayVolume(sConfiguration.DecimalPlace.Volume,3,1,3,12,volume,TRUE);//sConfiguration.DecimalPlace.Volume
 }
 /*Display 10 logs*/
 void LCD_ReadLog(u8 nLog)
@@ -166,7 +166,7 @@ void LCD_ReadLog(u8 nLog)
      LCD_DisplayNumber(stringToInt(sFrameLogs.logs[nLog-1].calender.uHour,2),1,15);
      LCD_Puts(1,17,":");      
      LCD_DisplayNumber(stringToInt(sFrameLogs.logs[nLog-1].calender.uMin,2),1,18);
-     LCD_DisplayVolume(3,2,6,2,14,(double)stringToInt(sFrameLogs.logs[nLog-1].data.uVolume,7)/1000,TRUE);//sConfiguration.DecimalPlace.Volume
+     LCD_DisplayVolume(sConfiguration.DecimalPlace.Volume,2,6,2,14,(double)stringToInt(sFrameLogs.logs[nLog-1].data.uVolume,7)/1000,TRUE);//sConfiguration.DecimalPlace.Volume
      LCD_DisplayAmount(stringToInt(sFrameLogs.logs[nLog-1].data.uAmount,7),3,6,3,14,TRUE);     
 }
 /**/
@@ -248,7 +248,7 @@ void PRESET_SendP1234(u8 key)
         }
         if(vol>0)
         {
-          LCD_DisplayVolume(3,2,6,2,15,vol/pow(10,sTypeValues.len_tp[i+2]),TRUE);//sConfiguration.DecimalPlace.Volume
+          LCD_DisplayVolume(sConfiguration.DecimalPlace.Volume,2,6,2,15,vol/pow(10,sTypeValues.len_tp[i+2]),TRUE);//sConfiguration.DecimalPlace.Volume
         }         
       }
       else
@@ -280,7 +280,9 @@ void LCD_DisplayVolume(u8 dot,u8 x1,u8 y1,u8 x2,u8 y2,double data,bool bDisplay_
   if(dot==3)
     sprintf(buffer,"%.3f",data); 
   else if(dot==2)
-    sprintf(buffer,"%.2f",data); 
+    sprintf(buffer,"%.2f",data);
+  else if(dot==1)
+    sprintf(buffer,"%.1f",data);  
   LCD_Puts(x1,y1,(int8_t*)buffer); 
   if(bDisplay_Lit==TRUE)
   {
@@ -332,7 +334,7 @@ void TextLcd_Display(bool bl,u32 num,u8 leng,u8 value,bool bDisplay_Donvi)
   if(value!=0)LCD_Puts(2,1,"POS:");
   if(bl==FALSE)
   { 
-    LCD_DisplayVolume(3,2,6,2,15,num/pow(10,leng),bDisplay_Donvi);//sConfiguration.DecimalPlace.Volume
+    LCD_DisplayVolume(sConfiguration.DecimalPlace.Volume,2,6,2,15,num/pow(10,leng),bDisplay_Donvi);//sConfiguration.DecimalPlace.Volume
   }
   /*Amount*/
   else
@@ -479,7 +481,7 @@ void vTimerCallback_ClearCode( TimerHandle_t xTimer )
       Change_Values(Mode,aCode);  
       if(uDataLeng==0)
       {
-         LAPIS_ChangeValue(aCode[uCntPcode],uCntScode,setValue(Mode,aCode[uCntPcode],uCntScode,0,0,2),3,getSizeFieldDataChange(aCode[uCntPcode],uCntScode));  //sConfiguration.DecimalPlace.Volume
+         LAPIS_ChangeValue(aCode[uCntPcode],uCntScode,setValue(Mode,aCode[uCntPcode],uCntScode,0,0,2),sConfiguration.DecimalPlace.Volume,getSizeFieldDataChange(aCode[uCntPcode],uCntScode));  //sConfiguration.DecimalPlace.Volume
       }
     }       
     if(uProcessCodeLeng>0)
@@ -634,12 +636,12 @@ void vLcdTask(void * pvParameters)
                   {
                     if(cntTotal==0)
                     {
-                      LCD_ReadTotal(cntTotal,sConfiguration.Totalizer.amount,sConfiguration.Totalizer.volume/pow(10,3));//sConfiguration.DecimalPlace.Volume
+                      LCD_ReadTotal(cntTotal,sConfiguration.Totalizer.amount,sConfiguration.Totalizer.volume/pow(10,sConfiguration.DecimalPlace.Volume));//sConfiguration.DecimalPlace.Volume
                       cntTotal=1;
                     }
                     else if(cntTotal==1)
                     {                      
-                      LCD_ReadTotal(cntTotal,sConfiguration.DailyTotal.amount,sConfiguration.DailyTotal.volume/pow(10,3));//sConfiguration.DecimalPlace.Volume
+                      LCD_ReadTotal(cntTotal,sConfiguration.DailyTotal.amount,sConfiguration.DailyTotal.volume/pow(10,sConfiguration.DecimalPlace.Volume));//sConfiguration.DecimalPlace.Volume
                       cntTotal=0;
                     }                      
                   } 
@@ -697,7 +699,7 @@ void vLcdTask(void * pvParameters)
                     uPresetNum=stringToInt(aBuffKey,uDataLeng);                    
                     if(bPressDot==TRUE )
                     {
-                      if( uPresetDecimalLeng<3)//sConfiguration.DecimalPlace.Volume
+                      if( uPresetDecimalLeng<sConfiguration.DecimalPlace.Volume)//sConfiguration.DecimalPlace.Volume
                       {
                         uPresetDecimalLeng++;
                         sprintf(abuffer,"%.3f",(float)uPresetNum/pow(10,uPresetDecimalLeng));    
@@ -1104,7 +1106,7 @@ void vLcdTask(void * pvParameters)
             if(cKEY=='X')
             {
               NHAN:            
-              LAPIS_DisplaySetup(SUNNYXE_READ,aCodeReadMode[uCntPcode],++uCntScode,3);//sConfiguration.DecimalPlace.Volume
+              LAPIS_DisplaySetup(SUNNYXE_READ,aCodeReadMode[uCntPcode],++uCntScode,sConfiguration.DecimalPlace.Volume);//sConfiguration.DecimalPlace.Volume
               /*read log*/
               if(uCntPcode==3)
               {
@@ -1212,7 +1214,7 @@ void vLcdTask(void * pvParameters)
                 }          
               }
               if((bFlagValidEnterCode==TRUE) ||(eTypeRead_Select==READ))
-               LAPIS_DisplaySetup(Mode,aCode[uCntPcode],uCntScode,3);//sConfiguration.DecimalPlace.Volume
+               LAPIS_DisplaySetup(Mode,aCode[uCntPcode],uCntScode,sConfiguration.DecimalPlace.Volume);//sConfiguration.DecimalPlace.Volume
              }
             else if(cKEY=='C')
             {
@@ -1256,9 +1258,9 @@ void vLcdTask(void * pvParameters)
                 u8 buff[15];
                 if(uValue<=9999)
                 {
-                  Dots(3);//sConfiguration.DecimalPlace.Volume
+                  Dots(sConfiguration.DecimalPlace.Volume);//sConfiguration.DecimalPlace.Volume
                   sfRow1(24,0); 
-                  IntergerDigitsExtraction(buff,7,uValue*(uint64_t)(pow(10,3))); //sConfiguration.DecimalPlace.Volume                 
+                  IntergerDigitsExtraction(buff,7,uValue*(uint64_t)(pow(10,sConfiguration.DecimalPlace.Volume))); //sConfiguration.DecimalPlace.Volume                 
                   LAPIS_DisplayNumber(uSegDigits[buff[6]]);
                   for( i=6;i>0;i--)
                   {
@@ -1344,7 +1346,7 @@ void vLcdTask(void * pvParameters)
                   {
                     uDataLeng=0;
                     if(bHaveDot==TRUE) bHaveDot=FALSE;
-                    LAPIS_DisplaySetup(Mode,aCode[uCntPcode],uCntScode,3);//sConfiguration.DecimalPlace.Volume
+                    LAPIS_DisplaySetup(Mode,aCode[uCntPcode],uCntScode,sConfiguration.DecimalPlace.Volume);//sConfiguration.DecimalPlace.Volume
                   }
                 }              
             }          
@@ -1378,7 +1380,7 @@ void vLcdTask(void * pvParameters)
                 bSaveData=FALSE;
               }
               if((bFlagValidEnterCode==TRUE) ||(eTypeRead_Select==READ))
-              LAPIS_DisplaySetup(Mode,aCodePeco[uCntPcode],uCntScode,3); //sConfiguration.DecimalPlace.Volume
+              LAPIS_DisplaySetup(Mode,aCodePeco[uCntPcode],uCntScode,sConfiguration.DecimalPlace.Volume); //sConfiguration.DecimalPlace.Volume
             }
             else if(cKEY=='C')
             {
@@ -1715,7 +1717,7 @@ bool SUNNYXE_SaveData( volatile SysConfig_t *config,uint64_t intValue,u8 pcode,u
           taskENTER_CRITICAL();
           if(cntScode==1)
           {
-            config->DailyTotal.volume=intValue*pow(10,3-uLengTphan); //sConfiguration.DecimalPlace.Volume
+            config->DailyTotal.volume=intValue*pow(10,sConfiguration.DecimalPlace.Volume-uLengTphan); //sConfiguration.DecimalPlace.Volume
             sTypeValues.len_tp[0]=uLengTphan;
           }
           else if(cntScode==2)config->DailyTotal.amount=intValue; 

@@ -276,13 +276,13 @@ void POS_UpdateConfig(u8* ptr,volatile SysConfig_t     *config)
   config->Calendar.minutes=stringToInt( dtFrame.Calendar.uMin,2);
   config->Version.versionCpu=stringToInt( dtFrame.bVersion,2);
   config->Version.versionLcd=LCD_Version;
-  sTypeValues.len_tp[0]=3;//config->DecimalPlace.Volume;
-  sTypeValues.len_tp[1]=3;//config->DecimalPlace.Volume; 
-  
    config->DecimalPlace.Amount = stringToInt(dtFrame.DecimalPlace.uAmount,1);
    config->DecimalPlace.Volume = stringToInt(dtFrame.DecimalPlace.uVolume,1);
    config->DecimalPlace.UnitPrice = stringToInt(dtFrame.DecimalPlace.uPrice,1);
 
+  sTypeValues.len_tp[0]=config->DecimalPlace.Volume;//config->DecimalPlace.Volume;
+  sTypeValues.len_tp[1]=config->DecimalPlace.Volume;//config->DecimalPlace.Volume; 
+  
   config->PosVersion= stringToInt(dtFrame.PosVersion,1);
   config->UAV.uUPLossPower=stringToInt(dtFrame.UAV.uUPLossPower,6);
   config->UAV.uVolumeLossPower=stringToInt(dtFrame.UAV.uVolumeLossPower,7);

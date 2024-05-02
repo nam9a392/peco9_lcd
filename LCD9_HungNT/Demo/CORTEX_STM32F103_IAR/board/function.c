@@ -199,7 +199,7 @@ void    LAPIS_DISPLAY(SysStatus_t *status,eFuelingMode_t fuelMode)//,volatile Sy
 {
   u8 i;
   LAPIS_Clear();
-  Dots(3);
+  Dots(sConfiguration.DecimalPlace.Volume); // change
   if((fuelMode==NORMAL)||(fuelMode== TRAINING)||(fuelMode==  ACTUAL))
   {
     /*unit price*/
@@ -241,18 +241,18 @@ void    LAPIS_DISPLAY(SysStatus_t *status,eFuelingMode_t fuelMode)//,volatile Sy
    /*Clear Error*/
   else LAPIS_ClearSegment(14);
   /*Volume*/ 
-  for(i=0;i<4;i++)//config->DecimalPlace.Volume+1
+  for(i=0;i<sConfiguration.DecimalPlace.Volume+1;i++)//sConfiguration.DecimalPlace.Volume+1
   {
     LAPIS_DisplayNumber(uSegDigits[status->uArray_VL[6-i]]);
   }
-  if(status->uLeng[1]>4)//(config->DecimalPlace.Volume+1)
+  if(status->uLeng[1]>(sConfiguration.DecimalPlace.Volume+1))//(sConfiguration.DecimalPlace.Volume+1)
   {
-    for(i=4;i<status->uLeng[1];i++)LAPIS_DisplayNumber(uSegDigits[status->uArray_VL[6-i]]);//config->DecimalPlace.Volume+1
+    for(i=sConfiguration.DecimalPlace.Volume+1;i<status->uLeng[1];i++)LAPIS_DisplayNumber(uSegDigits[status->uArray_VL[6-i]]);//sConfiguration.DecimalPlace.Volume+1
     for(i=0;i<Volume_MaxLeng-status->uLeng[1];i++)LAPIS_ClearSegment(7); 
   }
   else
   {
-    for(i=0;i<3;i++)LAPIS_ClearSegment(7); //6-config->DecimalPlace.Volume
+    for(i=0;i<(6-sConfiguration.DecimalPlace.Volume);i++)LAPIS_ClearSegment(7); //6-sConfiguration.DecimalPlace.Volume
   }
   /*Amount*/
   for(i=0;i<status->uLeng[2];i++)
