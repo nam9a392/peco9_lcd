@@ -636,12 +636,12 @@ void vLcdTask(void * pvParameters)
                   {
                     if(cntTotal==0)
                     {
-                      LCD_ReadTotal(cntTotal,sConfiguration.Totalizer.amount,sConfiguration.Totalizer.volume/pow(10,sConfiguration.DecimalPlace.Volume));//sConfiguration.DecimalPlace.Volume
+                      LCD_ReadTotal(cntTotal,sConfiguration.Totalizer.amount,sConfiguration.Totalizer.volume/pow(10,3));//sConfiguration.DecimalPlace.Volume
                       cntTotal=1;
                     }
                     else if(cntTotal==1)
                     {                      
-                      LCD_ReadTotal(cntTotal,sConfiguration.DailyTotal.amount,sConfiguration.DailyTotal.volume/pow(10,sConfiguration.DecimalPlace.Volume));//sConfiguration.DecimalPlace.Volume
+                      LCD_ReadTotal(cntTotal,sConfiguration.DailyTotal.amount,sConfiguration.DailyTotal.volume/pow(10,3));//sConfiguration.DecimalPlace.Volume
                       cntTotal=0;
                     }                      
                   } 
