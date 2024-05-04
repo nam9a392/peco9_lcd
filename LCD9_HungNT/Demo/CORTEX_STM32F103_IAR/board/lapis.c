@@ -1106,7 +1106,7 @@ void vLcdTask(void * pvParameters)
             if(cKEY=='X')
             {
               NHAN:            
-              LAPIS_DisplaySetup(SUNNYXE_READ,aCodeReadMode[uCntPcode],++uCntScode,sConfiguration.DecimalPlace.Volume);//sConfiguration.DecimalPlace.Volume
+              LAPIS_DisplaySetup(SUNNYXE_READ,aCodeReadMode[uCntPcode],++uCntScode);//sConfiguration.DecimalPlace.Volume
               /*read log*/
               if(uCntPcode==3)
               {
@@ -1214,7 +1214,7 @@ void vLcdTask(void * pvParameters)
                 }          
               }
               if((bFlagValidEnterCode==TRUE) ||(eTypeRead_Select==READ))
-               LAPIS_DisplaySetup(Mode,aCode[uCntPcode],uCntScode,sConfiguration.DecimalPlace.Volume);//sConfiguration.DecimalPlace.Volume
+               LAPIS_DisplaySetup(Mode,aCode[uCntPcode],uCntScode);//sConfiguration.DecimalPlace.Volume
              }
             else if(cKEY=='C')
             {
@@ -1346,7 +1346,7 @@ void vLcdTask(void * pvParameters)
                   {
                     uDataLeng=0;
                     if(bHaveDot==TRUE) bHaveDot=FALSE;
-                    LAPIS_DisplaySetup(Mode,aCode[uCntPcode],uCntScode,sConfiguration.DecimalPlace.Volume);//sConfiguration.DecimalPlace.Volume
+                    LAPIS_DisplaySetup(Mode,aCode[uCntPcode],uCntScode);//sConfiguration.DecimalPlace.Volume
                   }
                 }              
             }          
@@ -1380,7 +1380,7 @@ void vLcdTask(void * pvParameters)
                 bSaveData=FALSE;
               }
               if((bFlagValidEnterCode==TRUE) ||(eTypeRead_Select==READ))
-              LAPIS_DisplaySetup(Mode,aCodePeco[uCntPcode],uCntScode,sConfiguration.DecimalPlace.Volume); //sConfiguration.DecimalPlace.Volume
+              LAPIS_DisplaySetup(Mode,aCodePeco[uCntPcode],uCntScode); //sConfiguration.DecimalPlace.Volume
             }
             else if(cKEY=='C')
             {

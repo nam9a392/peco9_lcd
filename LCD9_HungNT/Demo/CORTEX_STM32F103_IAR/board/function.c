@@ -400,7 +400,7 @@ u8      sumSubcode(u8 pcode,eLoginMode_t mode)
     return 0;
 }
 
-void    LAPIS_DisplaySetup(eLoginMode_t mode,u8 pcode,u8 cntSub, u8 dot)
+void    LAPIS_DisplaySetup(eLoginMode_t mode,u8 pcode,u8 cntSub)
 {
   TypeValue_t value;
   TypeSubCode_t tScode;
@@ -413,7 +413,7 @@ void    LAPIS_DisplaySetup(eLoginMode_t mode,u8 pcode,u8 cntSub, u8 dot)
   {
     if(pcode!=3) valueDbOrInt=FALSE;
     bReadOnly=TRUE;    
-    fDisplay(pcode,tScode,value,dot,valueDbOrInt,getSizeFieldDataChange(pcode,cntSub));             
+    fDisplay(pcode,tScode,value,valueDbOrInt,getSizeFieldDataChange(pcode,cntSub));             
   }
   else if(mode==SUNNYXE_USER)
   {
@@ -432,11 +432,11 @@ void    LAPIS_DisplaySetup(eLoginMode_t mode,u8 pcode,u8 cntSub, u8 dot)
       case 29:        
         if(pcode==11||pcode==12||pcode==16)valueDbOrInt=FALSE;         
         if(pcode==11||pcode==16||pcode==19||pcode==20||pcode==21)bReadOnly=TRUE; //||pcode==21
-        fDisplay(pcode,tScode,value,dot,valueDbOrInt,getSizeFieldDataChange(pcode,cntSub));        
+        fDisplay(pcode,tScode,value,valueDbOrInt,getSizeFieldDataChange(pcode,cntSub));        
         break;
       case 24:          
         bReadOnly=TRUE;  
-        fDisplay24(pcode,tScode,value,dot,cntSub,uPresetValue);
+        fDisplay24(pcode,tScode,value,cntSub,uPresetValue);
         break;
     }
   }
@@ -473,10 +473,10 @@ void    LAPIS_DisplaySetup(eLoginMode_t mode,u8 pcode,u8 cntSub, u8 dot)
         { 
           bReadOnly=TRUE;
         }
-        fDisplay(pcode,tScode,value,dot,valueDbOrInt,getSizeFieldDataChange(pcode,cntSub));        
+        fDisplay(pcode,tScode,value,valueDbOrInt,getSizeFieldDataChange(pcode,cntSub));        
         break;
        case 24: 
-        fDisplay24(pcode,tScode,value,dot,cntSub,uPresetValue);
+        fDisplay24(pcode,tScode,value,cntSub,uPresetValue);
         break; 
       case 37:
 //        if(pcode==37 && (mode==SUNNYXE_ADMIN))
@@ -492,7 +492,7 @@ void    LAPIS_DisplaySetup(eLoginMode_t mode,u8 pcode,u8 cntSub, u8 dot)
       case 99:
         if (pcode==99)bReadOnly=TRUE;
         valueDbOrInt=FALSE;
-        fDisplay(pcode,tScode,value,1,valueDbOrInt,getSizeFieldDataChange(pcode,cntSub));
+        fDisplay(pcode,tScode,value,valueDbOrInt,getSizeFieldDataChange(pcode,cntSub));
         break;
       case 95:
         fDisplay95(pcode,value);
@@ -503,7 +503,7 @@ void    LAPIS_DisplaySetup(eLoginMode_t mode,u8 pcode,u8 cntSub, u8 dot)
   {
     if(pcode==70)
     {
-      fDisplay(pcode,tScode,value,dot,valueDbOrInt,getSizeFieldDataChange(pcode,cntSub)); 
+      fDisplay(pcode,tScode,value,valueDbOrInt,getSizeFieldDataChange(pcode,cntSub)); 
     }
   }
 }
@@ -721,7 +721,7 @@ void LAPIS_ChangeValue(u8 pcode,u8 cntSub,TypeValue_t tValue,u8 dot,u8 sizefield
     case 95:
 
       if(pcode==12||pcode==16||pcode==41||pcode==63||pcode==95)valueDbOrInt=FALSE;
-        fDisplay(pcode,tScode,tValue,dot,valueDbOrInt,sizefield);  //getSizeFieldDataChange(pcode,cntSub)
+        fDisplay(pcode,tScode,tValue,valueDbOrInt,sizefield);  //getSizeFieldDataChange(pcode,cntSub)
       break; 
    case 37:
      fDisplay37(cntSub);
@@ -1399,9 +1399,10 @@ void sfDisplayValueChange(u8 pcode,TypeSubCode_t tScode,TypeValue_t tValue,u8 do
     }    
   LATCH();
 }
-void fDisplay(u8 pcode,TypeSubCode_t tScode,TypeValue_t tValue,u8 dot,bool valueDbOrInt,u8 size)//SysConfig_t config
+void fDisplay(u8 pcode,TypeSubCode_t tScode,TypeValue_t tValue,bool valueDbOrInt,u8 size)//SysConfig_t config
 {
-  u8 i;
+  u8 i,dot;
+  dot = 3;
   u8 buff[15]={0};
   u8 len=0;
     if(pcode==24)
@@ -1466,8 +1467,7 @@ void fDisplay(u8 pcode,TypeSubCode_t tScode,TypeValue_t tValue,u8 dot,bool value
       LAPIS_DisplayNumber(uSegDigits[buff[3]]);  
       LAPIS_CheckDisplay(buff,3,0);
       LAPIS_ClearSegment(7);             
-    }   
-    else
+    }else
     {
       if(tScode.cSub[0]!=NULL)
       {
@@ -1475,6 +1475,7 @@ void fDisplay(u8 pcode,TypeSubCode_t tScode,TypeValue_t tValue,u8 dot,bool value
         {
           if(tScode.cSub[1]=='L')
           {
+            dot = sConfiguration.DecimalPlace.Volume;
             Dots(0,dot,0);
             Row3(uSegDigits[pcode/10],uSegDigits[pcode%10],uSegDigits[tScode.cSub[0]-0x30],uSegDigits[12]);
             IntergerDigitsExtraction(buff,10,(uint64_t)tValue.db *(uint64_t)pow(10,dot-tValue.len_tp[0]));       
@@ -1489,12 +1490,15 @@ void fDisplay(u8 pcode,TypeSubCode_t tScode,TypeValue_t tValue,u8 dot,bool value
           }
           else if(tScode.cSub[1]=='A')
           {
+            dot = sConfiguration.DecimalPlace.Amount;
+            Dots(0,dot,0);
             Row3(uSegDigits[pcode/10],uSegDigits[pcode%10],uSegDigits[tScode.cSub[0]-0x30],uSegDigits[10]);
             len=Split_Number((tValue._u64),buff);//(u32)
             display_valueChange(pcode,buff,len,0,size,bHaveDot);    
           }
           else if((tScode.cSub[0]=='b') ||(tScode.cSub[0]=='d')||(tScode.cSub[0]=='F'))
           {
+            dot = 1;
             Dots(0,dot,0);
             LAPIS_DisplayNumber(uSegDigits[tScode.cSub[1]-0x30]);
             if(tScode.cSub[0]=='b')
@@ -1515,10 +1519,12 @@ void fDisplay(u8 pcode,TypeSubCode_t tScode,TypeValue_t tValue,u8 dot,bool value
         }
         else if(valueDbOrInt==TRUE) //value Interger
         {
+          dot = sConfiguration.DecimalPlace.Amount;
           if(tScode.cSub[0]!=0)
           {
             if(tScode.cSub[0]=='A')
             {
+              Dots(0,dot,0);
               sfRow1(pcode,10); 
             }   
             len=Split_Number((u32)(tValue._u32),buff);
@@ -1560,16 +1566,18 @@ void fDisplay(u8 pcode,TypeSubCode_t tScode,TypeValue_t tValue,u8 dot,bool value
     }
     LATCH();
 }
-void fDisplay24(u8 pcode,TypeSubCode_t tScode,TypeValue_t tValue,u8 dot,u8 cntScode,u8 selectPreset)//SysConfig_t config
+void fDisplay24(u8 pcode,TypeSubCode_t tScode,TypeValue_t tValue,u8 cntScode,u8 selectPreset)//SysConfig_t config
 {
-  u8 i;
+  u8 i,dot;
+  dot = 3;
   u8 buff[15]={0};
   u8 len=0;
   
   if(tScode.cSub[0]!=NULL)
   {
     if((tScode.cSub[0]=='L'))
-    {              
+    {            
+      dot =  sConfiguration.DecimalPlace.Volume;
       if(cntScode==2 ||cntScode==3 ||cntScode==4 || cntScode==5)
       {
         if(tValue.len_tp[cntScode]>0)
@@ -1624,6 +1632,7 @@ void fDisplay24(u8 pcode,TypeSubCode_t tScode,TypeValue_t tValue,u8 dot,u8 cntSc
     }      
     else if(tScode.cSub[0]=='A')
     {
+      dot =  sConfiguration.DecimalPlace.Amount;
       sfRow1(pcode,10);   
       if(cntScode==2 ||cntScode==3 ||cntScode==4 || cntScode==5)
       {
