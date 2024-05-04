@@ -324,10 +324,10 @@ void POS_UpdateSysStatusData(u8* ptr,SysStatus_t* status)
     if(status->NZZLStatus!=NZZL_HANG )
     {
       status->uLeng[0]=LengthOfInt(status->uPrice);
-      status->uLeng[1]=LengthOfInt((u32)(status->uVolume/pow(10,3-sConfiguration.DecimalPlace.Volume)));
+      status->uLeng[1]=LengthOfInt((u32)(status->uVolume));
       status->uLeng[2]=LengthOfInt(status->uAmount);
       Split_Digit(status->uPrice,status->uArray_UP,5);
-      Split_Digit((u32)(status->uVolume/pow(10,3-sConfiguration.DecimalPlace.Volume)),status->uArray_VL,7);
+      Split_Digit((u32)(status->uVolume),status->uArray_VL,7);
       Split_Digit(status->uAmount,status->uArray_AM,7);
     }
     if(status->errCode.Code[0]!=0x30&&(status->errCode.Code[0]!='F')&&(status->errCode.Code[1]!='F'))bExitsErrcode=TRUE; 

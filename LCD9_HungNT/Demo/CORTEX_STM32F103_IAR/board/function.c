@@ -109,9 +109,24 @@ void	LAPIS_WaitPasswordState(u8 leng)
   LATCH();
 }
 
-void Dots(u8 Dot)
+void Dots(u8 r1_dot,u8 r2_dot,u8 r3_dot)
 {
-    sfDots(7-Dot);
+    u8 i,temp1, temp2, temp3;
+    temp1 = r1_dot == 0 ? 0 : r1_dot + 6;
+    temp2 = r2_dot == 0 ? 0 : r2_dot + 3;
+    temp3 = r3_dot == 0 ? 0 : r3_dot + 0;
+    for(i=1;i<=9;i++) 
+    {
+      if((i == temp1) || (i == temp2) || (i == temp3))
+      {
+        DATA_LCD_HIGH;
+      }
+      else
+      {
+        DATA_LCD_LOW;
+      }
+      SHIFT();
+    }
 }
 void sfDots(u8 n)
 {
@@ -119,7 +134,7 @@ void sfDots(u8 n)
   digit=0x40;
   for(i=0;i<n;i++) 
   {
-    if((digit&0x40)==0x40)//0x40
+    if(((digit&0x40)==0x40) || (i == 4) || (i == 7))//0x40
     {
       DATA_LCD_HIGH;
     }
@@ -199,7 +214,8 @@ void    LAPIS_DISPLAY(SysStatus_t *status,eFuelingMode_t fuelMode)//,volatile Sy
 {
   u8 i;
   LAPIS_Clear();
-  Dots(sConfiguration.DecimalPlace.Volume); // change
+  Dots(sConfiguration.DecimalPlace.Amount,sConfiguration.DecimalPlace.Volume,sConfiguration.DecimalPlace.UnitPrice);// change
+
   if((fuelMode==NORMAL)||(fuelMode== TRAINING)||(fuelMode==  ACTUAL))
   {
     /*unit price*/
@@ -255,11 +271,23 @@ void    LAPIS_DISPLAY(SysStatus_t *status,eFuelingMode_t fuelMode)//,volatile Sy
     for(i=0;i<(6-sConfiguration.DecimalPlace.Volume);i++)LAPIS_ClearSegment(7); //6-sConfiguration.DecimalPlace.Volume
   }
   /*Amount*/
-  for(i=0;i<status->uLeng[2];i++)
+  // for(i=0;i<status->uLeng[2];i++)
+  // {
+  //   LAPIS_DisplayNumber(uSegDigits[status->uArray_AM[6-i]]);
+  // }
+  for(i=0;i<sConfiguration.DecimalPlace.Amount+1;i++)
   {
     LAPIS_DisplayNumber(uSegDigits[status->uArray_AM[6-i]]);
   }
-  for(i=0;i<Amount_MaxLeng-status->uLeng[2];i++)LAPIS_ClearSegment(7); 
+  if(status->uLeng[2]>(sConfiguration.DecimalPlace.Amount+1))//(sConfiguration.DecimalPlace.Amount+1)
+  {
+    for(i=sConfiguration.DecimalPlace.Amount+1;i<status->uLeng[2];i++)LAPIS_DisplayNumber(uSegDigits[status->uArray_AM[6-i]]);//sConfiguration.DecimalPlace.Volume+1
+    for(i=0;i<Amount_MaxLeng-status->uLeng[2];i++)LAPIS_ClearSegment(7); 
+  }else
+  {
+    for(i=0;i<(6-sConfiguration.DecimalPlace.Amount);i++)LAPIS_ClearSegment(7); //6-sConfiguration.DecimalPlace.Volume
+  }
+  // for(i=0;i<Amount_MaxLeng-status->uLeng[2];i++)LAPIS_ClearSegment(7); 
   LATCH();
 }
 
@@ -1207,7 +1235,7 @@ void sfDisplayValueChange(u8 pcode,TypeSubCode_t tScode,TypeValue_t tValue,u8 do
 
         if(tValue.len_tp[uCntScode-2]>0)
         {
-          Dots(dot);
+          Dots(0,dot,0);
           sfRow1(pcode,0);              
           IntergerDigitsExtraction(buff,7,(uint64_t)(tValue.db)*(uint64_t)pow(10,dot-tValue.len_tp[uCntScode-2]));       
            Display_ArrayNumber(buff,6,3,0);
@@ -1258,7 +1286,7 @@ void sfDisplayValueChange(u8 pcode,TypeSubCode_t tScode,TypeValue_t tValue,u8 do
         {
           if(tScode.cSub[1]=='L')
           {
-            Dots(dot);  
+            Dots(0,dot,0);  
             Row3(uSegDigits[pcode/10],uSegDigits[pcode%10],uSegDigits[tScode.cSub[0]-0x30],uSegDigits[12]);
             IntergerDigitsExtraction(buff,10,(uint64_t)(tValue.db)*(uint64_t)pow(10,dot-tValue.len_tp[0]));          
             Display_ArrayNumber(buff,9,6,0);
@@ -1279,7 +1307,7 @@ void sfDisplayValueChange(u8 pcode,TypeSubCode_t tScode,TypeValue_t tValue,u8 do
           }
           else if(tScode.cSub[0]=='F')
           {
-            Dots(1);
+            Dots(0,1,0);
              Row3(uSegDigits[pcode/10],uSegDigits[pcode%10],uSegDigits[11],uSegDigits[tScode.cSub[1]-0x30]);
              i=(u8)tValue.db;
             LAPIS_DisplayNumber(uSegDigits[i%10]);
@@ -1317,7 +1345,7 @@ void sfDisplayValueChange(u8 pcode,TypeSubCode_t tScode,TypeValue_t tValue,u8 do
           if(tValue.db!=0)
           {
             //Dots(3);
-            Dots(dot);
+            Dots(0,dot,0);
           }
           sfRow1(pcode,tScode.iSub);    
           if(tValue.db!=0)
@@ -1396,7 +1424,7 @@ void fDisplay(u8 pcode,TypeSubCode_t tScode,TypeValue_t tValue,u8 dot,bool value
 
         if(tValue.len_tp[uCntScode-2]>0)
         {
-          Dots(dot);
+          Dots(0,dot,0);
           sfRow1(pcode,0);              
           IntergerDigitsExtraction(buff,7,(uint64_t)(tValue.db)*(uint64_t)pow(10,dot-tValue.len_tp[uCntScode-2]));       
            Display_ArrayNumber(buff,6,3,0);
@@ -1447,7 +1475,7 @@ void fDisplay(u8 pcode,TypeSubCode_t tScode,TypeValue_t tValue,u8 dot,bool value
         {
           if(tScode.cSub[1]=='L')
           {
-            Dots(dot);
+            Dots(0,dot,0);
             Row3(uSegDigits[pcode/10],uSegDigits[pcode%10],uSegDigits[tScode.cSub[0]-0x30],uSegDigits[12]);
             IntergerDigitsExtraction(buff,10,(uint64_t)tValue.db *(uint64_t)pow(10,dot-tValue.len_tp[0]));       
             Display_ArrayNumber(buff,9,6,0);
@@ -1467,7 +1495,7 @@ void fDisplay(u8 pcode,TypeSubCode_t tScode,TypeValue_t tValue,u8 dot,bool value
           }
           else if((tScode.cSub[0]=='b') ||(tScode.cSub[0]=='d')||(tScode.cSub[0]=='F'))
           {
-            Dots(dot);
+            Dots(0,dot,0);
             LAPIS_DisplayNumber(uSegDigits[tScode.cSub[1]-0x30]);
             if(tScode.cSub[0]=='b')
               LAPIS_DisplayNumber(uSegDigits[16]);  
@@ -1502,7 +1530,7 @@ void fDisplay(u8 pcode,TypeSubCode_t tScode,TypeValue_t tValue,u8 dot,bool value
       {
         if(tValue.db!=0)
         {
-          Dots(dot);
+          Dots(0,dot,0);
         }
         sfRow1(pcode,tScode.iSub);      
         if(tValue.db!=0)
@@ -1546,7 +1574,7 @@ void fDisplay24(u8 pcode,TypeSubCode_t tScode,TypeValue_t tValue,u8 dot,u8 cntSc
       {
         if(tValue.len_tp[cntScode]>0)
         {           
-          Dots(dot);
+          Dots(0,dot,0);
           sfRow1(pcode,12);   
           IntergerDigitsExtraction(buff,7,(uint64_t)tValue.db *(uint64_t)pow(10,dot-tValue.len_tp[cntScode]));
           Display_ArrayNumber(buff,6,3,0); 
@@ -1563,7 +1591,7 @@ void fDisplay24(u8 pcode,TypeSubCode_t tScode,TypeValue_t tValue,u8 dot,u8 cntSc
           IntergerDigitsExtraction(buff,7,(uint64_t)tValue.db); 
           if(len<=4)
           {
-            Dots(dot);
+            Dots(0,dot,0);
             sfRow1(pcode,12);   
             LAPIS_DisplayNumber(uSegDigits[0]);
             LAPIS_DisplayNumber(uSegDigits[0]);                     

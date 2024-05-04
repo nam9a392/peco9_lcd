@@ -96,7 +96,7 @@ void    LAPIS_BusyState(void);
 void	LAPIS_WaitPasswordState(u8 leng);
 void 	LAPIS_WaitCodeState(void);
 void    LAPIS_DisplayCode(void);
-void 	Dots(u8	Dot);
+void 	Dots(u8 r1_dot,u8 r2_dot,u8 r3_dot);
 void    sfDots(u8 n);
 //void    reset_AmountVolume(void);
 void reset_AmountVolume(SysStatus_t *sProcess);

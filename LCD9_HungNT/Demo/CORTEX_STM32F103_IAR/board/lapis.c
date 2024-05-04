@@ -1258,7 +1258,7 @@ void vLcdTask(void * pvParameters)
                 u8 buff[15];
                 if(uValue<=9999)
                 {
-                  Dots(sConfiguration.DecimalPlace.Volume);//sConfiguration.DecimalPlace.Volume
+                  Dots(0,sConfiguration.DecimalPlace.Volume,0);//sConfiguration.DecimalPlace.Volume
                   sfRow1(24,0); 
                   IntergerDigitsExtraction(buff,7,uValue*(uint64_t)(pow(10,sConfiguration.DecimalPlace.Volume))); //sConfiguration.DecimalPlace.Volume                 
                   LAPIS_DisplayNumber(uSegDigits[buff[6]]);
