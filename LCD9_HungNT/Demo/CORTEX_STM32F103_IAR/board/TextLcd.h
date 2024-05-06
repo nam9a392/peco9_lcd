@@ -59,7 +59,7 @@ void LCD_MsgSendFalse(void);
 void LCD_ReadLog(u8 nLog);
 void LCD_ReadTotal(u8 cnt,uint64_t amount,double volume);//,SysConfig_t     *config
 void LCD_ChangeInfo(char *infor,u8 index,u8 leng,u8 indexfont);
-void LCD_DisplayVolume(u8 dot,u8 x1,u8 y1,u8 x2,u8 y2,double data,bool bDisplay_Lit);
+void LCD_DisplayVolume(u8 x1,u8 y1,u8 x2,u8 y2,double data,bool bDisplay_Lit);
 void LCD_MoveCursor(u8 x,u8 y);
 void Delay(volatile uint32_t nCount);
  

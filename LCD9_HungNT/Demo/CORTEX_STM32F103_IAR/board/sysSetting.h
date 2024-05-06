@@ -136,7 +136,7 @@ typedef enum _FuelingMode
 typedef enum
 {
     SUNNYXE_PRESET =0,
-    SUNNYXE_CODE,
+    SUNNYXE_CODE,       // pumpsetting check pass
     SUNNYXE_PRINT,
     SUNNYXE_READ,
     SUNNYXE_ADMIN,

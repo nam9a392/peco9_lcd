@@ -151,7 +151,7 @@ void LCD_ReadTotal(u8 cnt,uint64_t amount,double volume)//,SysConfig_t     *conf
   else  LCD_DisplayFollowLanguage( 1,0,1,0,"Tong ngay:","Total Day:" );
 
   LCD_DisplayAmount(amount,2,1,2,12,TRUE);
-  LCD_DisplayVolume(sConfiguration.DecimalPlace.Volume,3,1,3,12,volume,TRUE);//sConfiguration.DecimalPlace.Volume
+  LCD_DisplayVolume(3,1,3,12,volume,TRUE);//sConfiguration.DecimalPlace.Volume
 }
 /*Display 10 logs*/
 void LCD_ReadLog(u8 nLog)
@@ -166,7 +166,7 @@ void LCD_ReadLog(u8 nLog)
      LCD_DisplayNumber(stringToInt(sFrameLogs.logs[nLog-1].calender.uHour,2),1,15);
      LCD_Puts(1,17,":");      
      LCD_DisplayNumber(stringToInt(sFrameLogs.logs[nLog-1].calender.uMin,2),1,18);
-     LCD_DisplayVolume(sConfiguration.DecimalPlace.Volume,2,6,2,14,(double)stringToInt(sFrameLogs.logs[nLog-1].data.uVolume,7)/1000,TRUE);//sConfiguration.DecimalPlace.Volume
+     LCD_DisplayVolume(2,6,2,14,(double)stringToInt(sFrameLogs.logs[nLog-1].data.uVolume,7)/pow(10,sConfiguration.DecimalPlace.Volume),TRUE);//sConfiguration.DecimalPlace.Volume
      LCD_DisplayAmount(stringToInt(sFrameLogs.logs[nLog-1].data.uAmount,7),3,6,3,14,TRUE);     
 }
 /**/
@@ -248,7 +248,7 @@ void PRESET_SendP1234(u8 key)
         }
         if(vol>0)
         {
-          LCD_DisplayVolume(sConfiguration.DecimalPlace.Volume,2,6,2,15,vol/pow(10,sTypeValues.len_tp[i+2]),TRUE);//sConfiguration.DecimalPlace.Volume
+          LCD_DisplayVolume(2,6,2,15,vol/pow(10,sTypeValues.len_tp[i+2]),TRUE);//sConfiguration.DecimalPlace.Volume
         }         
       }
       else
@@ -274,8 +274,9 @@ void LCD_SenFalseMessage(void)
     LCD_Default(); 
     LCD_MsgSendFalse(); 
 }
-void LCD_DisplayVolume(u8 dot,u8 x1,u8 y1,u8 x2,u8 y2,double data,bool bDisplay_Lit)
+void LCD_DisplayVolume(u8 x1,u8 y1,u8 x2,u8 y2,double data,bool bDisplay_Lit)
 {
+  u8 dot = sConfiguration.DecimalPlace.Volume;
   char buffer[12];  
   if(dot==3)
     sprintf(buffer,"%.3f",data); 
@@ -334,7 +335,7 @@ void TextLcd_Display(bool bl,u32 num,u8 leng,u8 value,bool bDisplay_Donvi)
   if(value!=0)LCD_Puts(2,1,"POS:");
   if(bl==FALSE)
   { 
-    LCD_DisplayVolume(sConfiguration.DecimalPlace.Volume,2,6,2,15,num/pow(10,leng),bDisplay_Donvi);//sConfiguration.DecimalPlace.Volume
+    LCD_DisplayVolume(2,6,2,15,num/pow(10,leng),bDisplay_Donvi);//sConfiguration.DecimalPlace.Volume
   }
   /*Amount*/
   else
@@ -636,12 +637,12 @@ void vLcdTask(void * pvParameters)
                   {
                     if(cntTotal==0)
                     {
-                      LCD_ReadTotal(cntTotal,sConfiguration.Totalizer.amount,sConfiguration.Totalizer.volume/pow(10,3));//sConfiguration.DecimalPlace.Volume
+                      LCD_ReadTotal(cntTotal,sConfiguration.Totalizer.amount,sConfiguration.Totalizer.volume/pow(10,sConfiguration.DecimalPlace.Volume));//sConfiguration.DecimalPlace.Volume
                       cntTotal=1;
                     }
                     else if(cntTotal==1)
                     {                      
-                      LCD_ReadTotal(cntTotal,sConfiguration.DailyTotal.amount,sConfiguration.DailyTotal.volume/pow(10,3));//sConfiguration.DecimalPlace.Volume
+                      LCD_ReadTotal(cntTotal,sConfiguration.DailyTotal.amount,sConfiguration.DailyTotal.volume/pow(10,sConfiguration.DecimalPlace.Volume));//sConfiguration.DecimalPlace.Volume
                       cntTotal=0;
                     }                      
                   } 
