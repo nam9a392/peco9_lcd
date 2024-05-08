@@ -20,7 +20,7 @@ __packed typedef struct _TotalizerValue
 __packed typedef struct _DailyTotalizerValue
 {
   double volume; // L
-  uint64_t amount;
+  double amount;
 	
 }DailyTotalizerValue_t;
 

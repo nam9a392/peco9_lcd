@@ -219,11 +219,23 @@ void    LAPIS_DISPLAY(SysStatus_t *status,eFuelingMode_t fuelMode)//,volatile Sy
   if((fuelMode==NORMAL)||(fuelMode== TRAINING)||(fuelMode==  ACTUAL))
   {
     /*unit price*/
-    for(i=0;i<status->uLeng[0];i++)//arr[0]=status->uLeng[0]
+    // for(i=0;i<status->uLeng[0];i++)//arr[0]=status->uLeng[0]
+    // {
+    //   LAPIS_DisplayNumber(uSegDigits[status->uArray_UP[4-i]]);
+    // }
+    // for(i=0;i<Unitprice_MaxLeng-status->uLeng[0];i++)LAPIS_ClearSegment(7);
+    for(i=0;i<sConfiguration.DecimalPlace.UnitPrice+1;i++)
     {
       LAPIS_DisplayNumber(uSegDigits[status->uArray_UP[4-i]]);
     }
-    for(i=0;i<Unitprice_MaxLeng-status->uLeng[0];i++)LAPIS_ClearSegment(7); 
+    if(status->uLeng[0]>(sConfiguration.DecimalPlace.UnitPrice+1))//(sConfiguration.DecimalPlace.UnitPrice+1)
+    {
+      for(i=sConfiguration.DecimalPlace.UnitPrice+1;i<status->uLeng[0];i++)LAPIS_DisplayNumber(uSegDigits[status->uArray_UP[4-i]]);//sConfiguration.DecimalPlace.Volume+1
+      for(i=0;i<Unitprice_MaxLeng-status->uLeng[0];i++)LAPIS_ClearSegment(7); 
+    }else
+    {
+      for(i=0;i<(4-sConfiguration.DecimalPlace.UnitPrice);i++)LAPIS_ClearSegment(7); //6-sConfiguration.DecimalPlace.Volume
+    }
   }
   /*Flow rate Display*/
   else if(fuelMode==FLOW_RATE_DISPLAY)
@@ -1402,7 +1414,7 @@ void sfDisplayValueChange(u8 pcode,TypeSubCode_t tScode,TypeValue_t tValue,u8 do
 void fDisplay(u8 pcode,TypeSubCode_t tScode,TypeValue_t tValue,bool valueDbOrInt,u8 size)//SysConfig_t config
 {
   u8 i,dot;
-  dot = 3;
+  dot = 0;
   u8 buff[15]={0};
   u8 len=0;
     if(pcode==24)
@@ -1494,7 +1506,7 @@ void fDisplay(u8 pcode,TypeSubCode_t tScode,TypeValue_t tValue,bool valueDbOrInt
             Dots(0,dot,0);
             Row3(uSegDigits[pcode/10],uSegDigits[pcode%10],uSegDigits[tScode.cSub[0]-0x30],uSegDigits[10]);
             len=Split_Number((tValue._u64),buff);//(u32)
-            display_valueChange(pcode,buff,len,0,size,bHaveDot);    
+            display_valueChange(pcode,buff,len,dot,size,dot > 0 ? TRUE : FALSE);    
           }
           else if((tScode.cSub[0]=='b') ||(tScode.cSub[0]=='d')||(tScode.cSub[0]=='F'))
           {
@@ -1528,14 +1540,16 @@ void fDisplay(u8 pcode,TypeSubCode_t tScode,TypeValue_t tValue,bool valueDbOrInt
               sfRow1(pcode,10); 
             }   
             len=Split_Number((u32)(tValue._u32),buff);
-            display_valueChange(pcode,buff,len,0,size,bHaveDot);                        
+            display_valueChange(pcode,buff,len,dot,size,dot > 0 ? TRUE : FALSE);                        
           }
         }
       }
       else if(tScode.iSub!=0)
       {
-        if(tValue.db!=0)
+        if((tValue.db!=0) || (pcode==13)||(pcode==3))
         {
+          if((pcode==13)||(pcode==3))
+            dot = sConfiguration.DecimalPlace.UnitPrice;
           Dots(0,dot,0);
         }
         sfRow1(pcode,tScode.iSub);      
@@ -1554,7 +1568,7 @@ void fDisplay(u8 pcode,TypeSubCode_t tScode,TypeValue_t tValue,bool valueDbOrInt
         else
         {
           len=Split_Number((u32)(tValue._u32),buff);
-          display_valueChange(pcode,buff,len,0,size,bHaveDot);
+          display_valueChange(pcode,buff,len,dot,size,dot > 0 ? TRUE : FALSE);
         }
       }
       else //NO subcode
@@ -1806,15 +1820,15 @@ void display_valueChange(u8 code,u8 num[],u8 len,u8 dot,u8 size,bool bHaveDot)
          }
       }
       else
-      {    
-          Display_ArrayNumber(0,size-len,0,0);
+      {
+          Display_ArrayNumber(num,size-len,0,0);
           Display_ArrayNumber(num,len,0,1);
           LAPIS_ClearSegment((14-size)*7);  
       } 
      }
     else
     {
-      Display_ArrayNumber(0,3-uLengTphan,0,0);
+      Display_ArrayNumber(num,3-uLengTphan,0,0);
       for(i=0;i<uLengTphan;i++)
       {
           LAPIS_DisplayNumber(uSegDigits[num[len-i-1]]);     
@@ -1831,7 +1845,7 @@ void display_valueChange(u8 code,u8 num[],u8 len,u8 dot,u8 size,bool bHaveDot)
         }
       }
       else
-      LAPIS_ClearSegment((11+uLengTphan-len)*7);         
+        LAPIS_ClearSegment((11+uLengTphan-len)*7);    
     }
   }
   else

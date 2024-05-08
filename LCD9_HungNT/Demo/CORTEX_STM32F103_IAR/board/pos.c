@@ -566,7 +566,7 @@ bool Send_Text(DataSetup_t *data)
     else if(data->AmountOrVolume==2 ||data->AmountOrVolume==4 )
     {
       buff[5]='0';       
-      DigitsExtraction(buff_data,7,(data->data64)*(uint64_t)pow(10,(3 - data->leng_tp)));             
+      DigitsExtraction(buff_data,7,(data->data64)*(uint64_t)pow(10,(sConfiguration.DecimalPlace.Volume - data->leng_tp)));             
     }
     for(i=0;i<7;i++)
     {

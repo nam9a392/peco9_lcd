@@ -219,7 +219,7 @@ void vProcessData( void *pvParameters )
                 {
                   if(ubuffvalue!=sProcessStatus.uPosVolume)
                   {
-                    TextLcd_Display(FALSE,sProcessStatus.uPosVolume,3,1,TRUE);
+                    TextLcd_Display(FALSE,sProcessStatus.uPosVolume,sConfiguration.DecimalPlace.Volume,1,TRUE);
                     ubuffvalue=sProcessStatus.uPosVolume;
                   }                    
                 }
@@ -228,7 +228,7 @@ void vProcessData( void *pvParameters )
                 {                   
                   if(ubuffvalue!=sProcessStatus.uPosAmount)
                   {
-                    TextLcd_Display(TRUE,sProcessStatus.uPosAmount,3,2,TRUE);
+                    TextLcd_Display(TRUE,sProcessStatus.uPosAmount,sConfiguration.DecimalPlace.Amount,2,TRUE);
                     ubuffvalue=sProcessStatus.uPosAmount;
                   }                  
                 } 

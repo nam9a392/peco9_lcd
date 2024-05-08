@@ -119,16 +119,23 @@ void PRESET_SendValue(char key)
   {
     /*Amount*/
     data.AmountOrVolume=3;
+    if(uPresetDecimalLeng < sConfiguration.DecimalPlace.Amount)
+    {
+      uPresetNum = uPresetNum * pow(10,sConfiguration.DecimalPlace.Amount - uPresetDecimalLeng);
+      uPresetDecimalLeng = sConfiguration.DecimalPlace.Amount;
+    }
+    data.leng_tp=uPresetDecimalLeng;
     bl=TRUE;
   }
   else if(key=='L')
   {
     /*Volume*/
-    data.AmountOrVolume=4; 
+    data.AmountOrVolume=4;
     data.leng_tp=uPresetDecimalLeng;
   }
   data.code=6;
-  data.data64=uPresetNum; 
+  data.data64=uPresetNum;
+
 //  TextLcd_Display(bl,uPresetNum,uPresetDecimalLeng,0,FALSE);
   if(sEnablePreset.bNzzlHang==TRUE)//||(WaitReceivedNzzlHang()==TRUE)
   {
@@ -145,7 +152,7 @@ void PRESET_SendValue(char key)
 }
 
 /*Display Total*/
-void LCD_ReadTotal(u8 cnt,uint64_t amount,double volume)//,SysConfig_t     *config
+void LCD_ReadTotal(u8 cnt,double amount,double volume)//,SysConfig_t     *config
 {
   if(cnt==0)LCD_DisplayFollowLanguage( 1,0,1,0,"So tong:","Total:" );
   else  LCD_DisplayFollowLanguage( 1,0,1,0,"Tong ngay:","Total Day:" );
@@ -167,7 +174,7 @@ void LCD_ReadLog(u8 nLog)
      LCD_Puts(1,17,":");      
      LCD_DisplayNumber(stringToInt(sFrameLogs.logs[nLog-1].calender.uMin,2),1,18);
      LCD_DisplayVolume(2,6,2,14,(double)stringToInt(sFrameLogs.logs[nLog-1].data.uVolume,7)/pow(10,sConfiguration.DecimalPlace.Volume),TRUE);//sConfiguration.DecimalPlace.Volume
-     LCD_DisplayAmount(stringToInt(sFrameLogs.logs[nLog-1].data.uAmount,7),3,6,3,14,TRUE);     
+     LCD_DisplayAmount((double)stringToInt(sFrameLogs.logs[nLog-1].data.uAmount,7)/pow(10,sConfiguration.DecimalPlace.Amount),3,6,3,14,TRUE);//sConfiguration.DecimalPlace.Amount     
 }
 /**/
 void LCD_MsgSendFalse(void)
@@ -283,7 +290,9 @@ void LCD_DisplayVolume(u8 x1,u8 y1,u8 x2,u8 y2,double data,bool bDisplay_Lit)
   else if(dot==2)
     sprintf(buffer,"%.2f",data);
   else if(dot==1)
-    sprintf(buffer,"%.1f",data);  
+    sprintf(buffer,"%.1f",data);
+  else if(dot==0)
+    sprintf(buffer,"%.0f",data);    
   LCD_Puts(x1,y1,(int8_t*)buffer); 
   if(bDisplay_Lit==TRUE)
   {
@@ -340,7 +349,7 @@ void TextLcd_Display(bool bl,u32 num,u8 leng,u8 value,bool bDisplay_Donvi)
   /*Amount*/
   else
   {             
-    LCD_DisplayAmount(num,2,6,2,14,bDisplay_Donvi);
+    LCD_DisplayAmount(num/pow(10,leng),2,6,2,14,bDisplay_Donvi);//sConfiguration.DecimalPlace.Amount
   }
 }
 void LCD_DisplayNumber(u32 num,u8 x,u8 y)
@@ -412,10 +421,18 @@ void Switch_Money(u8 x2,u8 y2)
   LCD_Puts(x2,y2,(int8_t*)buff);
     
 }
-void LCD_DisplayAmount(uint64_t amount,u8 x1,u8 y1,u8 x2,u8 y2,bool bDisplay_DvTien)
+void LCD_DisplayAmount(double amount,u8 x1,u8 y1,u8 x2,u8 y2,bool bDisplay_DvTien)
 {
+    u8 dot = sConfiguration.DecimalPlace.Amount;
     char buffer[12]; 
-    sprintf(buffer,"%llu",amount);              
+    if(dot==3)
+      sprintf(buffer,"%.3f",amount); 
+    else if(dot==2)
+      sprintf(buffer,"%.2f",amount);
+    else if(dot==1)
+      sprintf(buffer,"%.1f",amount);
+    else if(dot==0)
+      sprintf(buffer,"%.0f",amount);               
     LCD_Puts(x1,y1,(int8_t*)buffer);
     if(bDisplay_DvTien==TRUE)
     { 
@@ -428,7 +445,7 @@ bool PRESET_CheckValid(u32 value,u8 lengtp,bool AV)
   /*check Amount*/
   if(AV==TRUE)
   {
-    if(( value >9999999) ||(value==0) ||(lengtp>0))//(value<sConfiguration.UnitPrice)
+    if(( value >9999999) ||(value==0) || (lengtp > sConfiguration.DecimalPlace.Amount))//(value<sConfiguration.UnitPrice)
     {
       return FALSE;
     }
@@ -437,7 +454,7 @@ bool PRESET_CheckValid(u32 value,u8 lengtp,bool AV)
   /*Check Volume*/
   else
   {
-    if( ((value/pow(10,lengtp) )<=fVolumeLimit)&& (value>0 )&&(sConfiguration.UnitPrice>0))// (value>=1 )
+    if( ((value/pow(10,lengtp) )<=fVolumeLimit)&& (value>0 )&&(sConfiguration.UnitPrice>0) && (lengtp < sConfiguration.DecimalPlace.Volume+1))// (value>=1 )
     {
       return TRUE;
     }
@@ -637,12 +654,12 @@ void vLcdTask(void * pvParameters)
                   {
                     if(cntTotal==0)
                     {
-                      LCD_ReadTotal(cntTotal,sConfiguration.Totalizer.amount,sConfiguration.Totalizer.volume/pow(10,sConfiguration.DecimalPlace.Volume));//sConfiguration.DecimalPlace.Volume
+                      LCD_ReadTotal(cntTotal,sConfiguration.Totalizer.amount/pow(10,sConfiguration.DecimalPlace.Amount),sConfiguration.Totalizer.volume/pow(10,sConfiguration.DecimalPlace.Volume));//sConfiguration.DecimalPlace.Volume
                       cntTotal=1;
                     }
                     else if(cntTotal==1)
                     {                      
-                      LCD_ReadTotal(cntTotal,sConfiguration.DailyTotal.amount,sConfiguration.DailyTotal.volume/pow(10,sConfiguration.DecimalPlace.Volume));//sConfiguration.DecimalPlace.Volume
+                      LCD_ReadTotal(cntTotal,sConfiguration.DailyTotal.amount/pow(10,sConfiguration.DecimalPlace.Amount),sConfiguration.DailyTotal.volume/pow(10,sConfiguration.DecimalPlace.Volume));//sConfiguration.DecimalPlace.Volume
                       cntTotal=0;
                     }                      
                   } 
@@ -700,7 +717,7 @@ void vLcdTask(void * pvParameters)
                     uPresetNum=stringToInt(aBuffKey,uDataLeng);                    
                     if(bPressDot==TRUE )
                     {
-                      if( uPresetDecimalLeng<sConfiguration.DecimalPlace.Volume)//sConfiguration.DecimalPlace.Volume
+                      if( uPresetDecimalLeng<3)//sConfiguration.DecimalPlace.Volume
                       {
                         uPresetDecimalLeng++;
                         sprintf(abuffer,"%.3f",(float)uPresetNum/pow(10,uPresetDecimalLeng));    
