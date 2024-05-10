@@ -1437,6 +1437,7 @@ void fDisplay(u8 pcode,TypeSubCode_t tScode,TypeValue_t tValue,bool valueDbOrInt
 
         if(tValue.len_tp[uCntScode-2]>0)
         {
+          dot = 3;
           Dots(0,dot,0);
           sfRow1(pcode,0);              
           IntergerDigitsExtraction(buff,7,(uint64_t)(tValue.db)*(uint64_t)pow(10,dot-tValue.len_tp[uCntScode-2]));       
@@ -1504,6 +1505,7 @@ void fDisplay(u8 pcode,TypeSubCode_t tScode,TypeValue_t tValue,bool valueDbOrInt
           {
             dot = sConfiguration.DecimalPlace.Amount;
             Dots(0,dot,0);
+            dot = 0;
             Row3(uSegDigits[pcode/10],uSegDigits[pcode%10],uSegDigits[tScode.cSub[0]-0x30],uSegDigits[10]);
             len=Split_Number((tValue._u64),buff);//(u32)
             display_valueChange(pcode,buff,len,dot,size,dot > 0 ? TRUE : FALSE);    
@@ -1537,6 +1539,7 @@ void fDisplay(u8 pcode,TypeSubCode_t tScode,TypeValue_t tValue,bool valueDbOrInt
             if(tScode.cSub[0]=='A')
             {
               Dots(0,dot,0);
+              dot = 0;
               sfRow1(pcode,10); 
             }   
             len=Split_Number((u32)(tValue._u32),buff);
@@ -1551,6 +1554,7 @@ void fDisplay(u8 pcode,TypeSubCode_t tScode,TypeValue_t tValue,bool valueDbOrInt
           if((pcode==13)||(pcode==3))
             dot = sConfiguration.DecimalPlace.UnitPrice;
           Dots(0,dot,0);
+          //dot = 0;
         }
         sfRow1(pcode,tScode.iSub);      
         if(tValue.db!=0)
@@ -1568,7 +1572,7 @@ void fDisplay(u8 pcode,TypeSubCode_t tScode,TypeValue_t tValue,bool valueDbOrInt
         else
         {
           len=Split_Number((u32)(tValue._u32),buff);
-          display_valueChange(pcode,buff,len,dot,size,dot > 0 ? TRUE : FALSE);
+          display_valueChange(pcode,buff,len,dot,size,FALSE);
         }
       }
       else //NO subcode
@@ -1647,6 +1651,7 @@ void fDisplay24(u8 pcode,TypeSubCode_t tScode,TypeValue_t tValue,u8 cntScode,u8 
     else if(tScode.cSub[0]=='A')
     {
       dot =  sConfiguration.DecimalPlace.Amount;
+      Dots(0,dot,0);
       sfRow1(pcode,10);   
       if(cntScode==2 ||cntScode==3 ||cntScode==4 || cntScode==5)
       {
@@ -1821,9 +1826,11 @@ void display_valueChange(u8 code,u8 num[],u8 len,u8 dot,u8 size,bool bHaveDot)
       }
       else
       {
-          Display_ArrayNumber(num,size-len,0,0);
+          // Display_ArrayNumber(num,size-len,0,0);
+          // Display_ArrayNumber(num,len,0,1);
+          // LAPIS_ClearSegment((14-size)*7);
           Display_ArrayNumber(num,len,0,1);
-          LAPIS_ClearSegment((14-size)*7);  
+          LAPIS_ClearSegment((14-len)*7);
       } 
      }
     else

@@ -124,7 +124,7 @@ void PRESET_SendValue(char key)
       uPresetNum = uPresetNum * pow(10,sConfiguration.DecimalPlace.Amount - uPresetDecimalLeng);
       uPresetDecimalLeng = sConfiguration.DecimalPlace.Amount;
     }
-    data.leng_tp=uPresetDecimalLeng;
+    //data.leng_tp=uPresetDecimalLeng;
     bl=TRUE;
   }
   else if(key=='L')
@@ -250,7 +250,7 @@ void PRESET_SendP1234(u8 key)
         LCD_Puts(2,1,(int8_t*)buffer);
         if(am>0)
         { 
-          LCD_DisplayAmount(am,2,6,2,14,TRUE);
+          LCD_DisplayAmount(am/pow(10,sConfiguration.DecimalPlace.Amount),2,6,2,14,TRUE);
           //Switch_Money(2,14);
         }
         if(vol>0)
@@ -1276,9 +1276,9 @@ void vLcdTask(void * pvParameters)
                 u8 buff[15];
                 if(uValue<=9999)
                 {
-                  Dots(0,sConfiguration.DecimalPlace.Volume,0);//sConfiguration.DecimalPlace.Volume
+                  Dots(0,3,0);//sConfiguration.DecimalPlace.Volume
                   sfRow1(24,0); 
-                  IntergerDigitsExtraction(buff,7,uValue*(uint64_t)(pow(10,sConfiguration.DecimalPlace.Volume))); //sConfiguration.DecimalPlace.Volume                 
+                  IntergerDigitsExtraction(buff,7,uValue*(uint64_t)(pow(10,3))); //sConfiguration.DecimalPlace.Volume                 
                   LAPIS_DisplayNumber(uSegDigits[buff[6]]);
                   for( i=6;i>0;i--)
                   {
@@ -1602,14 +1602,19 @@ bool PRESET_CheckValidAmount(uint64_t value,volatile BOOLEAN *flag,bool bHaveDot
   bool valid=TRUE;
   if(value<=9999999 && (value>0))//(value/sConfiguration.UnitPrice)>=1)
   {
-    if(bHaveDot==TRUE)
+    // if(bHaveDot==TRUE)
+    // {
+    //   valid=FALSE;
+    // }
+    // else if(bHaveDot==FALSE)
+    // {
+    //   *flag=TRUE;
+    // }
+    if((bHaveDot==TRUE) && (uLengTphan > sConfiguration.DecimalPlace.Amount))
     {
       valid=FALSE;
     }
-    else if(bHaveDot==FALSE)
-    {
-      *flag=TRUE;
-    }
+    *flag=TRUE;
   }
   else
   {
@@ -1652,8 +1657,6 @@ bool SUNNYXE_SaveData24(volatile SysConfig_t *config,uint64_t intValue,u8 cntSco
   bool    saveDone=FALSE;
   DataSetup_t   data; 
   data.code=24;
-  data.data64=intValue; 
-
   if((cntScode==2||cntScode==3||cntScode==4||cntScode==5))  
   {
     if(uPresetValue==0 ||uPresetValue==1)
@@ -1665,8 +1668,13 @@ bool SUNNYXE_SaveData24(volatile SysConfig_t *config,uint64_t intValue,u8 cntSco
         data.leng_tp=uLengTphan;
       }
        else
-        data.Index[1]=0;
+       {
+          intValue = intValue* pow(10,sConfiguration.DecimalPlace.Amount - uLengTphan);
+          data.Index[1]=0;
+       }
+        
     }
+    data.data64=intValue; 
     data.Index[0]=cntScode-1;   
     data.leng_data=uDataLeng;
   } 

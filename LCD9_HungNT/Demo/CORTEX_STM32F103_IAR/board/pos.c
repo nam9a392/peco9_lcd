@@ -239,14 +239,17 @@ void POS_UpdateConfig(u8* ptr,volatile SysConfig_t     *config)
   config->Totalizer.amount=stringToInt( dtFrame.fTotal.uAmount,10);
   config->DailyTotal.volume=stringToInt( dtFrame.fDailyTotal.uVolume,10);
   config->DailyTotal.amount=stringToInt( dtFrame.fDailyTotal.uAmount,10);  
-  config->FuelingLimit=stringToInt( dtFrame.FuelingLimit,7);    
+  config->FuelingLimit=stringToInt( dtFrame.FuelingLimit,7);   
+  config->DecimalPlace.Amount = stringToInt(dtFrame.DecimalPlace.uAmount,1);
+   config->DecimalPlace.Volume = stringToInt(dtFrame.DecimalPlace.uVolume,1);
+   config->DecimalPlace.UnitPrice = stringToInt(dtFrame.DecimalPlace.uPrice,1); 
   for(i=0;i<4;i++)
   {
     if(stringToInt( dtFrame.KeypadSetting.P[i].uType,1)==0)
     {
        PRESET_TypeFlag[i]=bFALSE;
        uPresetValue=1;
-       sTypeValues.len_tp[i+2]=3;
+       sTypeValues.len_tp[i+2]=config->DecimalPlace.Volume;
        config->KeypadSetting.OneTouch.PV[i]=stringToInt( dtFrame.KeypadSetting.P[i].uValue,7);
     }
     else if(stringToInt( dtFrame.KeypadSetting.P[i].uType,1)==1)
@@ -276,9 +279,7 @@ void POS_UpdateConfig(u8* ptr,volatile SysConfig_t     *config)
   config->Calendar.minutes=stringToInt( dtFrame.Calendar.uMin,2);
   config->Version.versionCpu=stringToInt( dtFrame.bVersion,2);
   config->Version.versionLcd=LCD_Version;
-   config->DecimalPlace.Amount = stringToInt(dtFrame.DecimalPlace.uAmount,1);
-   config->DecimalPlace.Volume = stringToInt(dtFrame.DecimalPlace.uVolume,1);
-   config->DecimalPlace.UnitPrice = stringToInt(dtFrame.DecimalPlace.uPrice,1);
+   
 
   sTypeValues.len_tp[0]=config->DecimalPlace.Volume;//config->DecimalPlace.Volume;
   sTypeValues.len_tp[1]=config->DecimalPlace.Volume;//config->DecimalPlace.Volume; 
@@ -458,13 +459,13 @@ bool Send_Text(DataSetup_t *data)
         if(data->AmountOrVolume==2)
         {
           buff[7]='0';
-          DigitsExtraction(buff_data,7,(data->data64)*(uint64_t)pow(10,(3- data->leng_tp)));            
+          DigitsExtraction(buff_data,7,(data->data64)*(uint64_t)pow(10,(sConfiguration.DecimalPlace.Volume- data->leng_tp)));            
         }  
         /*Amount*/
         else
         {
           buff[7]='1';
-          DigitsExtraction(buff_data,7,data->data64);         
+            DigitsExtraction(buff_data,7,data->data64);         
         }
         for(i=0;i<7;i++)
         {
