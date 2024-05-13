@@ -1,8 +1,8 @@
 "C:\Program Files (x86)\IAR Systems\Embedded Workbench 8.0\arm\bin\armproc.dll" 
 
-"C:\Program Files (x86)\IAR Systems\Embedded Workbench 8.0\arm\bin\armsim2.dll" 
+"C:\Program Files (x86)\IAR Systems\Embedded Workbench 8.0\arm\bin\armstlink2.dll" 
 
-"F:\NamNote\reference\LCD9_HungNT\Demo\CORTEX_STM32F103_IAR\Debug\Exe\LCD.out" 
+"F:\NamNote\reference\peco9_lcd\LCD9_HungNT\Demo\CORTEX_STM32F103_IAR\Debug\Exe\LCD.out" 
 
 --plugin "C:\Program Files (x86)\IAR Systems\Embedded Workbench 8.0\arm\bin\armbat.dll" 
 

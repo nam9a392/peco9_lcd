@@ -26,7 +26,7 @@ extern volatile        bool bExtPFL;
 /*-----------------------------------------------------------*/
 extern u8 uSegDigits[];
 
-int main( void )
+ int main( void )
 {
   
   #ifdef DEBUG

@@ -119,16 +119,23 @@ void PRESET_SendValue(char key)
   {
     /*Amount*/
     data.AmountOrVolume=3;
+    if(uPresetDecimalLeng < sConfiguration.DecimalPlace.Amount)
+    {
+      uPresetNum = uPresetNum * pow(10,sConfiguration.DecimalPlace.Amount - uPresetDecimalLeng);
+      uPresetDecimalLeng = sConfiguration.DecimalPlace.Amount;
+    }
+    //data.leng_tp=uPresetDecimalLeng;
     bl=TRUE;
   }
   else if(key=='L')
   {
     /*Volume*/
-    data.AmountOrVolume=4; 
+    data.AmountOrVolume=4;
     data.leng_tp=uPresetDecimalLeng;
   }
   data.code=6;
-  data.data64=uPresetNum; 
+  data.data64=uPresetNum;
+
 //  TextLcd_Display(bl,uPresetNum,uPresetDecimalLeng,0,FALSE);
   if(sEnablePreset.bNzzlHang==TRUE)//||(WaitReceivedNzzlHang()==TRUE)
   {
@@ -145,13 +152,13 @@ void PRESET_SendValue(char key)
 }
 
 /*Display Total*/
-void LCD_ReadTotal(u8 cnt,uint64_t amount,double volume)//,SysConfig_t     *config
+void LCD_ReadTotal(u8 cnt,double amount,double volume)//,SysConfig_t     *config
 {
   if(cnt==0)LCD_DisplayFollowLanguage( 1,0,1,0,"So tong:","Total:" );
   else  LCD_DisplayFollowLanguage( 1,0,1,0,"Tong ngay:","Total Day:" );
 
   LCD_DisplayAmount(amount,2,1,2,12,TRUE);
-  LCD_DisplayVolume(3,3,1,3,12,volume,TRUE);//sConfiguration.DecimalPlace.Volume
+  LCD_DisplayVolume(3,1,3,12,volume,TRUE);//sConfiguration.DecimalPlace.Volume
 }
 /*Display 10 logs*/
 void LCD_ReadLog(u8 nLog)
@@ -166,8 +173,8 @@ void LCD_ReadLog(u8 nLog)
      LCD_DisplayNumber(stringToInt(sFrameLogs.logs[nLog-1].calender.uHour,2),1,15);
      LCD_Puts(1,17,":");      
      LCD_DisplayNumber(stringToInt(sFrameLogs.logs[nLog-1].calender.uMin,2),1,18);
-     LCD_DisplayVolume(3,2,6,2,14,(double)stringToInt(sFrameLogs.logs[nLog-1].data.uVolume,7)/1000,TRUE);//sConfiguration.DecimalPlace.Volume
-     LCD_DisplayAmount(stringToInt(sFrameLogs.logs[nLog-1].data.uAmount,7),3,6,3,14,TRUE);     
+     LCD_DisplayVolume(2,6,2,14,(double)stringToInt(sFrameLogs.logs[nLog-1].data.uVolume,7)/pow(10,sConfiguration.DecimalPlace.Volume),TRUE);//sConfiguration.DecimalPlace.Volume
+     LCD_DisplayAmount((double)stringToInt(sFrameLogs.logs[nLog-1].data.uAmount,7)/pow(10,sConfiguration.DecimalPlace.Amount),3,6,3,14,TRUE);//sConfiguration.DecimalPlace.Amount     
 }
 /**/
 void LCD_MsgSendFalse(void)
@@ -243,12 +250,12 @@ void PRESET_SendP1234(u8 key)
         LCD_Puts(2,1,(int8_t*)buffer);
         if(am>0)
         { 
-          LCD_DisplayAmount(am,2,6,2,14,TRUE);
+          LCD_DisplayAmount(am/pow(10,sConfiguration.DecimalPlace.Amount),2,6,2,14,TRUE);
           //Switch_Money(2,14);
         }
         if(vol>0)
         {
-          LCD_DisplayVolume(3,2,6,2,15,vol/pow(10,sTypeValues.len_tp[i+2]),TRUE);//sConfiguration.DecimalPlace.Volume
+          LCD_DisplayVolume(2,6,2,15,vol/pow(10,sTypeValues.len_tp[i+2]),TRUE);//sConfiguration.DecimalPlace.Volume
         }         
       }
       else
@@ -274,13 +281,18 @@ void LCD_SenFalseMessage(void)
     LCD_Default(); 
     LCD_MsgSendFalse(); 
 }
-void LCD_DisplayVolume(u8 dot,u8 x1,u8 y1,u8 x2,u8 y2,double data,bool bDisplay_Lit)
+void LCD_DisplayVolume(u8 x1,u8 y1,u8 x2,u8 y2,double data,bool bDisplay_Lit)
 {
+  u8 dot = sConfiguration.DecimalPlace.Volume;
   char buffer[12];  
   if(dot==3)
     sprintf(buffer,"%.3f",data); 
   else if(dot==2)
-    sprintf(buffer,"%.2f",data); 
+    sprintf(buffer,"%.2f",data);
+  else if(dot==1)
+    sprintf(buffer,"%.1f",data);
+  else if(dot==0)
+    sprintf(buffer,"%.0f",data);    
   LCD_Puts(x1,y1,(int8_t*)buffer); 
   if(bDisplay_Lit==TRUE)
   {
@@ -332,12 +344,12 @@ void TextLcd_Display(bool bl,u32 num,u8 leng,u8 value,bool bDisplay_Donvi)
   if(value!=0)LCD_Puts(2,1,"POS:");
   if(bl==FALSE)
   { 
-    LCD_DisplayVolume(3,2,6,2,15,num/pow(10,leng),bDisplay_Donvi);//sConfiguration.DecimalPlace.Volume
+    LCD_DisplayVolume(2,6,2,15,num/pow(10,leng),bDisplay_Donvi);//sConfiguration.DecimalPlace.Volume
   }
   /*Amount*/
   else
   {             
-    LCD_DisplayAmount(num,2,6,2,14,bDisplay_Donvi);
+    LCD_DisplayAmount(num/pow(10,leng),2,6,2,14,bDisplay_Donvi);//sConfiguration.DecimalPlace.Amount
   }
 }
 void LCD_DisplayNumber(u32 num,u8 x,u8 y)
@@ -409,10 +421,18 @@ void Switch_Money(u8 x2,u8 y2)
   LCD_Puts(x2,y2,(int8_t*)buff);
     
 }
-void LCD_DisplayAmount(uint64_t amount,u8 x1,u8 y1,u8 x2,u8 y2,bool bDisplay_DvTien)
+void LCD_DisplayAmount(double amount,u8 x1,u8 y1,u8 x2,u8 y2,bool bDisplay_DvTien)
 {
+    u8 dot = sConfiguration.DecimalPlace.Amount;
     char buffer[12]; 
-    sprintf(buffer,"%llu",amount);              
+    if(dot==3)
+      sprintf(buffer,"%.3f",amount); 
+    else if(dot==2)
+      sprintf(buffer,"%.2f",amount);
+    else if(dot==1)
+      sprintf(buffer,"%.1f",amount);
+    else if(dot==0)
+      sprintf(buffer,"%.0f",amount);               
     LCD_Puts(x1,y1,(int8_t*)buffer);
     if(bDisplay_DvTien==TRUE)
     { 
@@ -425,7 +445,7 @@ bool PRESET_CheckValid(u32 value,u8 lengtp,bool AV)
   /*check Amount*/
   if(AV==TRUE)
   {
-    if(( value >9999999) ||(value==0) ||(lengtp>0))//(value<sConfiguration.UnitPrice)
+    if(( value >9999999) ||(value==0) || (lengtp > sConfiguration.DecimalPlace.Amount))//(value<sConfiguration.UnitPrice)
     {
       return FALSE;
     }
@@ -434,7 +454,7 @@ bool PRESET_CheckValid(u32 value,u8 lengtp,bool AV)
   /*Check Volume*/
   else
   {
-    if( ((value/pow(10,lengtp) )<=fVolumeLimit)&& (value>0 )&&(sConfiguration.UnitPrice>0))// (value>=1 )
+    if( ((value/pow(10,lengtp) )<=fVolumeLimit)&& (value>0 )&&(sConfiguration.UnitPrice>0) && (lengtp < sConfiguration.DecimalPlace.Volume+1))// (value>=1 )
     {
       return TRUE;
     }
@@ -479,7 +499,7 @@ void vTimerCallback_ClearCode( TimerHandle_t xTimer )
       Change_Values(Mode,aCode);  
       if(uDataLeng==0)
       {
-         LAPIS_ChangeValue(aCode[uCntPcode],uCntScode,setValue(Mode,aCode[uCntPcode],uCntScode,0,0,2),3,getSizeFieldDataChange(aCode[uCntPcode],uCntScode));  //sConfiguration.DecimalPlace.Volume
+         LAPIS_ChangeValue(aCode[uCntPcode],uCntScode,setValue(Mode,aCode[uCntPcode],uCntScode,0,0,2),sConfiguration.DecimalPlace.Volume,getSizeFieldDataChange(aCode[uCntPcode],uCntScode));  //sConfiguration.DecimalPlace.Volume
       }
     }       
     if(uProcessCodeLeng>0)
@@ -559,15 +579,15 @@ void vLcdTask(void * pvParameters)
   u8      aCodeReadMode[Size_Array_ReadMode]={1,2,3,8};
   xQueueMessage   xMessageButton;
   LCD_Initial();
-  sConfiguration.DecimalPlace.Amount=0;
-  sConfiguration.DecimalPlace.Volume=3;
-  sConfiguration.DecimalPlace.UnitPrice=0;
+//  sConfiguration.DecimalPlace.Amount=0;
+//  sConfiguration.DecimalPlace.Volume=3;
+//  sConfiguration.DecimalPlace.UnitPrice=0;
   //LCD_Test();
   while(1)
   {
-    if((bKeypadEnable==TRUE) && (bSinalPFL==FALSE))
+    if((bKeypadEnable==TRUE) && (bSinalPFL==FALSE))                                                              
     {
-      if(Mode==SUNNYXE_PRESET)
+      if(Mode==SUNNYXE_PRESET) // pumpsetting on main display
       {
         u8  cntTotal=0;        
         do
@@ -634,12 +654,12 @@ void vLcdTask(void * pvParameters)
                   {
                     if(cntTotal==0)
                     {
-                      LCD_ReadTotal(cntTotal,sConfiguration.Totalizer.amount,sConfiguration.Totalizer.volume/pow(10,3));//sConfiguration.DecimalPlace.Volume
+                      LCD_ReadTotal(cntTotal,sConfiguration.Totalizer.amount/pow(10,sConfiguration.DecimalPlace.Amount),sConfiguration.Totalizer.volume/pow(10,sConfiguration.DecimalPlace.Volume));//sConfiguration.DecimalPlace.Volume
                       cntTotal=1;
                     }
                     else if(cntTotal==1)
                     {                      
-                      LCD_ReadTotal(cntTotal,sConfiguration.DailyTotal.amount,sConfiguration.DailyTotal.volume/pow(10,3));//sConfiguration.DecimalPlace.Volume
+                      LCD_ReadTotal(cntTotal,sConfiguration.DailyTotal.amount/pow(10,sConfiguration.DecimalPlace.Amount),sConfiguration.DailyTotal.volume/pow(10,sConfiguration.DecimalPlace.Volume));//sConfiguration.DecimalPlace.Volume
                       cntTotal=0;
                     }                      
                   } 
@@ -798,14 +818,14 @@ void vLcdTask(void * pvParameters)
                         uCntC=0;
                         bGoToReadMode=TRUE;                                     
                         Mode=SUNNYXE_CODE;    
-                        LCD_Default(); 
-                        LAPIS_DisplayCode(); 
+                        LCD_Default();       // print "Peco" in preset lcd
+                        LAPIS_DisplayCode(); // print CodE in col|row = 0|2
                         TIMER4_DISABLE();
                       }                                             
                       Reset_Buffer_Keypad();
                     }                      
                   }
-                  else if(uDataLeng==5)
+                  else if(uDataLeng==5) // why do max input buffer size has to be 5 ?????
                   {                  
                     Reset_Buffer_Keypad();
                   }                    
@@ -814,12 +834,12 @@ void vLcdTask(void * pvParameters)
           }
         }while(Mode==SUNNYXE_PRESET);					
       }
-      else if(Mode==SUNNYXE_CODE)
+      else if(Mode==SUNNYXE_CODE) // pumpsetting check pass
       {
         do
         {
           if(xQueueReceive(xKeypadQueue, &xMessageButton,(TickType_t)2))
-          {
+          {                                         
             //bEnableLCDStatusDisplay=TRUE;
             cKEY=xMessageButton.cMessageValue;
             if(cKEY=='X')
@@ -871,7 +891,7 @@ void vLcdTask(void * pvParameters)
           }
         }while(Mode==SUNNYXE_CODE);
       }  
-      else if(Mode==SUNNYXE_PRINT)
+      else if(Mode==SUNNYXE_PRINT) // printersetting
       {
         cKEY=0;
          bool   bGoPrinterMode=FALSE;
@@ -1104,7 +1124,7 @@ void vLcdTask(void * pvParameters)
             if(cKEY=='X')
             {
               NHAN:            
-              LAPIS_DisplaySetup(SUNNYXE_READ,aCodeReadMode[uCntPcode],++uCntScode,3);//sConfiguration.DecimalPlace.Volume
+              LAPIS_DisplaySetup(SUNNYXE_READ,aCodeReadMode[uCntPcode],++uCntScode);//sConfiguration.DecimalPlace.Volume
               /*read log*/
               if(uCntPcode==3)
               {
@@ -1212,7 +1232,7 @@ void vLcdTask(void * pvParameters)
                 }          
               }
               if((bFlagValidEnterCode==TRUE) ||(eTypeRead_Select==READ))
-               LAPIS_DisplaySetup(Mode,aCode[uCntPcode],uCntScode,3);//sConfiguration.DecimalPlace.Volume
+               LAPIS_DisplaySetup(Mode,aCode[uCntPcode],uCntScode);//sConfiguration.DecimalPlace.Volume
              }
             else if(cKEY=='C')
             {
@@ -1256,7 +1276,7 @@ void vLcdTask(void * pvParameters)
                 u8 buff[15];
                 if(uValue<=9999)
                 {
-                  Dots(3);//sConfiguration.DecimalPlace.Volume
+                  Dots(0,3,0);//sConfiguration.DecimalPlace.Volume
                   sfRow1(24,0); 
                   IntergerDigitsExtraction(buff,7,uValue*(uint64_t)(pow(10,3))); //sConfiguration.DecimalPlace.Volume                 
                   LAPIS_DisplayNumber(uSegDigits[buff[6]]);
@@ -1344,7 +1364,7 @@ void vLcdTask(void * pvParameters)
                   {
                     uDataLeng=0;
                     if(bHaveDot==TRUE) bHaveDot=FALSE;
-                    LAPIS_DisplaySetup(Mode,aCode[uCntPcode],uCntScode,3);//sConfiguration.DecimalPlace.Volume
+                    LAPIS_DisplaySetup(Mode,aCode[uCntPcode],uCntScode);//sConfiguration.DecimalPlace.Volume
                   }
                 }              
             }          
@@ -1378,7 +1398,7 @@ void vLcdTask(void * pvParameters)
                 bSaveData=FALSE;
               }
               if((bFlagValidEnterCode==TRUE) ||(eTypeRead_Select==READ))
-              LAPIS_DisplaySetup(Mode,aCodePeco[uCntPcode],uCntScode,3); //sConfiguration.DecimalPlace.Volume
+              LAPIS_DisplaySetup(Mode,aCodePeco[uCntPcode],uCntScode); //sConfiguration.DecimalPlace.Volume
             }
             else if(cKEY=='C')
             {
@@ -1582,14 +1602,19 @@ bool PRESET_CheckValidAmount(uint64_t value,volatile BOOLEAN *flag,bool bHaveDot
   bool valid=TRUE;
   if(value<=9999999 && (value>0))//(value/sConfiguration.UnitPrice)>=1)
   {
-    if(bHaveDot==TRUE)
+    // if(bHaveDot==TRUE)
+    // {
+    //   valid=FALSE;
+    // }
+    // else if(bHaveDot==FALSE)
+    // {
+    //   *flag=TRUE;
+    // }
+    if(((bHaveDot==TRUE) && (uLengTphan > sConfiguration.DecimalPlace.Amount)) || ((value * pow(10,sConfiguration.DecimalPlace.Amount)) > 9999999))
     {
       valid=FALSE;
     }
-    else if(bHaveDot==FALSE)
-    {
-      *flag=TRUE;
-    }
+    *flag=TRUE;
   }
   else
   {
@@ -1605,6 +1630,10 @@ bool PRESET_CheckValidVolume(uint64_t value,volatile BOOLEAN *flag,bool bHaveDot
   {
     if(((value/pow(10,uLengTphan))<=(9999999/sConfiguration.UnitPrice))&&(value>0))//(value>=1)
     {
+      if(uLengTphan > sConfiguration.DecimalPlace.Volume )
+      {
+        valid=FALSE;
+      }
       /*flag save volume status*/
       *flag=FALSE;
     }
@@ -1632,8 +1661,6 @@ bool SUNNYXE_SaveData24(volatile SysConfig_t *config,uint64_t intValue,u8 cntSco
   bool    saveDone=FALSE;
   DataSetup_t   data; 
   data.code=24;
-  data.data64=intValue; 
-
   if((cntScode==2||cntScode==3||cntScode==4||cntScode==5))  
   {
     if(uPresetValue==0 ||uPresetValue==1)
@@ -1645,8 +1672,13 @@ bool SUNNYXE_SaveData24(volatile SysConfig_t *config,uint64_t intValue,u8 cntSco
         data.leng_tp=uLengTphan;
       }
        else
-        data.Index[1]=0;
+       {
+          intValue = intValue* pow(10,sConfiguration.DecimalPlace.Amount - uLengTphan);
+          data.Index[1]=0;
+       }
+        
     }
+    data.data64=intValue; 
     data.Index[0]=cntScode-1;   
     data.leng_data=uDataLeng;
   } 
@@ -1715,7 +1747,7 @@ bool SUNNYXE_SaveData( volatile SysConfig_t *config,uint64_t intValue,u8 pcode,u
           taskENTER_CRITICAL();
           if(cntScode==1)
           {
-            config->DailyTotal.volume=intValue*pow(10,3-uLengTphan); //sConfiguration.DecimalPlace.Volume
+            config->DailyTotal.volume=intValue*pow(10,sConfiguration.DecimalPlace.Volume-uLengTphan); //sConfiguration.DecimalPlace.Volume
             sTypeValues.len_tp[0]=uLengTphan;
           }
           else if(cntScode==2)config->DailyTotal.amount=intValue; 
@@ -1939,48 +1971,48 @@ bool SUNNYXE_SaveData( volatile SysConfig_t *config,uint64_t intValue,u8 pcode,u
           }
         }        
         break;
-//      case 37:
-//        data.dataArr[0]=config->DecimalPlace.Amount;data.dataArr[1]=config->DecimalPlace.Volume;data.dataArr[2]=config->DecimalPlace.UnitPrice;
-//        if(config->DecimalPlace.Amount!=aDecimalBuffer[0])
-//        {
-//           saveEnable=TRUE;
-//           data.dataArr[0]=aDecimalBuffer[0];        
-//        }
-//        if(config->DecimalPlace.Volume!=aDecimalBuffer[1])
-//        {
-//           saveEnable=TRUE;
-//           data.dataArr[1]=aDecimalBuffer[1];
-//        }   
-//        if(config->DecimalPlace.UnitPrice!=aDecimalBuffer[2])
-//        {
-//           saveEnable=TRUE;
-//           data.dataArr[2]=aDecimalBuffer[2];
-//        } 
-//        if(saveEnable==TRUE)
-//        {  
-//          data.code=37;
-//          if(WaitTransmitDone(&data,TRUE)==TRUE)          
-//          {
-//            saveDone=TRUE;
-//            taskEXIT_CRITICAL();
-//            if(config->DecimalPlace.Amount!=aDecimalBuffer[0])config->DecimalPlace.Amount=aDecimalBuffer[0]; 
-//            if(config->DecimalPlace.Volume!=aDecimalBuffer[1])
+     case 37:
+       data.dataArr[0]=config->DecimalPlace.Amount;data.dataArr[1]=config->DecimalPlace.Volume;data.dataArr[2]=config->DecimalPlace.UnitPrice;
+       if(config->DecimalPlace.Amount!=aDecimalBuffer[0])
+       {
+          saveEnable=TRUE;
+          data.dataArr[0]=aDecimalBuffer[0];        
+       }
+       if(config->DecimalPlace.Volume!=aDecimalBuffer[1])
+       {
+          saveEnable=TRUE;
+          data.dataArr[1]=aDecimalBuffer[1];
+       }   
+       if(config->DecimalPlace.UnitPrice!=aDecimalBuffer[2])
+       {
+          saveEnable=TRUE;
+          data.dataArr[2]=aDecimalBuffer[2];
+       } 
+       if(saveEnable==TRUE)
+       {  
+         data.code=37;
+         if(WaitTransmitDone(&data,TRUE)==TRUE)          
+         {
+           saveDone=TRUE;
+           taskENTER_CRITICAL();
+           if(config->DecimalPlace.Amount!=aDecimalBuffer[0])config->DecimalPlace.Amount=aDecimalBuffer[0]; 
+           if(config->DecimalPlace.Volume!=aDecimalBuffer[1])
+           {
+             config->DecimalPlace.Volume=aDecimalBuffer[1];
+            //  if(Mode==SUNNYXE_ADMIN)
+            //    bChangeDecimalAdminMode=TRUE;
+           }
+           if(config->DecimalPlace.UnitPrice!=aDecimalBuffer[2])config->DecimalPlace.UnitPrice=aDecimalBuffer[2];    
+//            if(Mode==SUNNYXE_OILCOMP)
 //            {
-//              config->DecimalPlace.Volume=aDecimalBuffer[1];
-////              if(Mode==SUNNYXE_ADMIN)
-////                bChangeDecimalAdminMode=TRUE;
+//              sDecimal.Amount=config->DecimalPlace.Amount;
+//              sDecimal.UnitPrice=config->DecimalPlace.UnitPrice;
+//              sDecimal.Volume=config->DecimalPlace.Volume;
 //            }
-//            if(config->DecimalPlace.UnitPrice!=aDecimalBuffer[2])config->DecimalPlace.UnitPrice=aDecimalBuffer[2];    
-////            if(Mode==SUNNYXE_OILCOMP)
-////            {
-////              sDecimal.Amount=config->DecimalPlace.Amount;
-////              sDecimal.UnitPrice=config->DecimalPlace.UnitPrice;
-////              sDecimal.Volume=config->DecimalPlace.Volume;
-////            }
-//            taskEXIT_CRITICAL();
-//          }
-//        }         
-//        break;       
+           taskEXIT_CRITICAL();
+         }
+       }         
+       break;       
       case 41:
         if((config->PresetSlowdownPosition.F[cntScode-1]!=intValue)&&(intValue>=1)&&(intValue<=20)){
           saveEnable=TRUE;      
@@ -2225,7 +2257,12 @@ void Change_Values(eLoginMode_t mode,u8 arr[])
 {
   /*Select code*/
   if( bSelectCode==TRUE && bChangecode_SunnyPeco==FALSE)//just clear CCC;uCntPcode==0
-  {
+  { 
+    /*
+    *  - get input data as processcode
+    *  - convert string buffer into interget value
+    *  - jump to setting corressponding getting processcode
+    */
     if(uProcessCodeLeng<2)
     {
       eTypeRead_Select=SELECT;

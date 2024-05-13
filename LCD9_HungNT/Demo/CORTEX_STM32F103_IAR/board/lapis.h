@@ -26,6 +26,8 @@
 #include  "sysSetting.h"
 #include  "utility.h"
 #include  "listcode.h"
+
+extern  volatile u8                      aDecimalBuffer[3];
 #define		DATA_LOW		GPIO_WriteBit(KB_DATAOUT_PORT,KB_DATAOUT_PIN,Bit_RESET);
 #define		DATA_HIGH		GPIO_WriteBit(KB_DATAOUT_PORT,KB_DATAOUT_PIN,Bit_SET);
 #define		CLOCK_LOW		GPIO_WriteBit(KB_CLOCK_PORT,KB_CLOCK_PIN,Bit_RESET);
@@ -52,7 +54,7 @@
 #define Size_Number_Preset      7
 
 /*Version LCD*/
-#define LCD_Version             23   //Update version 18/12/2023
+#define LCD_Version             24   //Update version 18/12/2023
 #define CODE2_LENGTH            199
 void Display_DataChange(u8 code,u8 cntScode,eLoginMode_t mode,uint64_t *intValue,bool bDot, volatile TypeValue_t   *tValue);
 bool PRESET_CheckValidVolume(uint64_t value,volatile BOOLEAN *flag,bool havedot);
