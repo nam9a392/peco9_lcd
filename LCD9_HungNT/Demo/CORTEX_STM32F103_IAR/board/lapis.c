@@ -1610,7 +1610,7 @@ bool PRESET_CheckValidAmount(uint64_t value,volatile BOOLEAN *flag,bool bHaveDot
     // {
     //   *flag=TRUE;
     // }
-    if((bHaveDot==TRUE) && (uLengTphan > sConfiguration.DecimalPlace.Amount))
+    if(((bHaveDot==TRUE) && (uLengTphan > sConfiguration.DecimalPlace.Amount)) || ((value * pow(10,sConfiguration.DecimalPlace.Amount)) > 9999999))
     {
       valid=FALSE;
     }
@@ -1630,6 +1630,10 @@ bool PRESET_CheckValidVolume(uint64_t value,volatile BOOLEAN *flag,bool bHaveDot
   {
     if(((value/pow(10,uLengTphan))<=(9999999/sConfiguration.UnitPrice))&&(value>0))//(value>=1)
     {
+      if(uLengTphan > sConfiguration.DecimalPlace.Volume )
+      {
+        valid=FALSE;
+      }
       /*flag save volume status*/
       *flag=FALSE;
     }

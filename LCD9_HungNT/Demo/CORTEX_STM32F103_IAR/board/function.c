@@ -1572,7 +1572,7 @@ void fDisplay(u8 pcode,TypeSubCode_t tScode,TypeValue_t tValue,bool valueDbOrInt
         else
         {
           len=Split_Number((u32)(tValue._u32),buff);
-          display_valueChange(pcode,buff,len,dot,size,FALSE);
+          display_valueChange(pcode,buff,len,dot,size,bHaveDot);
         }
       }
       else //NO subcode
