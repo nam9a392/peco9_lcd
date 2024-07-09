@@ -1191,6 +1191,11 @@ void vLcdTask(void * pvParameters)
                 if(SUNNYXE_SaveData(&sConfiguration,uValue,aCode[uCntPcode],uCntScode)==TRUE)
                 {
                     eTypeRead_Select=READ;
+                }else{
+                  if(37 == aCode[uCntPcode])
+                  {
+                    uCntScode = 0;
+                  }
                 } 
                 bSaveData=FALSE;
                 bReadOnly=TRUE;
@@ -1707,6 +1712,22 @@ bool SUNNYXE_SaveData24(volatile SysConfig_t *config,uint64_t intValue,u8 cntSco
   }         
  return saveDone;
 }
+#define CODE37_INVALID_CASE_NUMBER  7
+uint8_t code37_invalid[CODE37_INVALID_CASE_NUMBER][3] = {{2,2,0},{3,2,0},{3,2,1},{0,2,3},{0,3,2},{0,3,3},{1,3,3}};
+bool code37_checkvalid(uint8_t amount, uint8_t volume, uint8_t price);
+bool code37_checkvalid(uint8_t amount, uint8_t volume, uint8_t price)
+{
+  bool retVal = TRUE;
+  uint8_t i = 0;
+  for(i = 0; i <  CODE37_INVALID_CASE_NUMBER ; i++)
+  {
+    if((amount == code37_invalid[i][0])&&(volume == code37_invalid[i][1])&&(price == code37_invalid[i][2]))
+    {
+      retVal = FALSE;
+    } 
+  }
+  return retVal;
+}
 bool SUNNYXE_SaveData( volatile SysConfig_t *config,uint64_t intValue,u8 pcode,u8 cntScode)
 {
   u8 str[5];
@@ -1795,8 +1816,7 @@ bool SUNNYXE_SaveData( volatile SysConfig_t *config,uint64_t intValue,u8 pcode,u
         data.leng_tp=uLengTphan;     
       }
       if(saveEnable==TRUE)
-      {    
-
+      {
         if(WaitTransmitDone(&data,TRUE)==TRUE)        
         {
           saveDone=TRUE;
@@ -1972,28 +1992,34 @@ bool SUNNYXE_SaveData( volatile SysConfig_t *config,uint64_t intValue,u8 pcode,u
         }        
         break;
      case 37:
-       data.dataArr[0]=config->DecimalPlace.Amount;data.dataArr[1]=config->DecimalPlace.Volume;data.dataArr[2]=config->DecimalPlace.UnitPrice;
-       if(config->DecimalPlace.Amount!=aDecimalBuffer[0])
+       saveDone=TRUE;
+       if(cntScode == 3)
        {
-          saveEnable=TRUE;
+       data.dataArr[0]=config->DecimalPlace.Amount;data.dataArr[1]=config->DecimalPlace.Volume;data.dataArr[2]=config->DecimalPlace.UnitPrice;
+       //if(config->DecimalPlace.Amount!=aDecimalBuffer[0])
+       {
           data.dataArr[0]=aDecimalBuffer[0];        
        }
-       if(config->DecimalPlace.Volume!=aDecimalBuffer[1])
+       //if(config->DecimalPlace.Volume!=aDecimalBuffer[1])
        {
-          saveEnable=TRUE;
           data.dataArr[1]=aDecimalBuffer[1];
        }   
-       if(config->DecimalPlace.UnitPrice!=aDecimalBuffer[2])
+       //if(config->DecimalPlace.UnitPrice!=aDecimalBuffer[2])
        {
-          saveEnable=TRUE;
           data.dataArr[2]=aDecimalBuffer[2];
        } 
+       if(TRUE == code37_checkvalid(data.dataArr[0],data.dataArr[1],data.dataArr[2]))
+       {
+          saveEnable=TRUE;
+       }else{
+          saveDone = FALSE;
+       }
        if(saveEnable==TRUE)
        {  
          data.code=37;
          if(WaitTransmitDone(&data,TRUE)==TRUE)          
          {
-           saveDone=TRUE;
+           
            taskENTER_CRITICAL();
            if(config->DecimalPlace.Amount!=aDecimalBuffer[0])config->DecimalPlace.Amount=aDecimalBuffer[0]; 
            if(config->DecimalPlace.Volume!=aDecimalBuffer[1])
@@ -2011,7 +2037,8 @@ bool SUNNYXE_SaveData( volatile SysConfig_t *config,uint64_t intValue,u8 pcode,u
 //            }
            taskEXIT_CRITICAL();
          }
-       }         
+       } 
+       }        
        break;       
       case 41:
         if((config->PresetSlowdownPosition.F[cntScode-1]!=intValue)&&(intValue>=1)&&(intValue<=20)){

@@ -495,9 +495,12 @@ void    LAPIS_DisplaySetup(eLoginMode_t mode,u8 pcode,u8 cntSub)
 //        {
           // bReadOnly=TRUE;//if(pcode==37 && (mode==SUNNYXE_ADMIN))
 //        }
-        aDecimalBuffer[0] = sConfiguration.DecimalPlace.Amount;
-        aDecimalBuffer[1] = sConfiguration.DecimalPlace.Volume;
-        aDecimalBuffer[2] = sConfiguration.DecimalPlace.UnitPrice;
+        if(1 == cntSub)
+        {
+            aDecimalBuffer[0] = sConfiguration.DecimalPlace.Amount;
+            aDecimalBuffer[1] = sConfiguration.DecimalPlace.Volume;
+            aDecimalBuffer[2] = sConfiguration.DecimalPlace.UnitPrice;
+        }
         fDisplay37(cntSub);
       break;
       case 41:
@@ -1552,8 +1555,15 @@ void fDisplay(u8 pcode,TypeSubCode_t tScode,TypeValue_t tValue,bool valueDbOrInt
         if((tValue.db!=0) || (pcode==13)||(pcode==3))
         {
           if((pcode==13)||(pcode==3))
+          {
             dot = sConfiguration.DecimalPlace.UnitPrice;
-          Dots(0,dot,0);
+            dot = 0;
+          }
+          if(pcode == 16){
+            dot = sConfiguration.DecimalPlace.Volume;
+            Dots(0,dot,0);
+          }
+          
           //dot = 0;
         }
         sfRow1(pcode,tScode.iSub);      
@@ -1814,7 +1824,7 @@ void display_valueChange(u8 code,u8 num[],u8 len,u8 dot,u8 size,bool bHaveDot)
        }
        else
        {
-          sf1(len,uLengTphan,num);          
+          sf1(len,uLengTphan,num);            
        }                                 
       }
       else if(code==24)

@@ -877,7 +877,7 @@
                 <expressions>
                     <item>Mode</item>
                     <item>Mode</item>
-                    <item></item>
+                    <item />
                 </expressions>
                 <col-names>
                     <item>Expression</item>
@@ -966,7 +966,7 @@
                     <item>range</item>
                     <item>rangData</item>
                     <item>Mode</item>
-                    <item></item>
+                    <item />
                 </expressions>
                 <col-names>
                     <item>Expression</item>
