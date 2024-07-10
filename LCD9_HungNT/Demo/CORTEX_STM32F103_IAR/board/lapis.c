@@ -1197,7 +1197,10 @@ void vLcdTask(void * pvParameters)
                     uCntScode = 0;
                   }
                 } 
-                bSaveData=FALSE;
+                if(!((37 == aCode[uCntPcode]) && (uCntScode < 3)))
+                {
+                    bSaveData=FALSE;
+                }
                 bReadOnly=TRUE;
                 uDataLeng=0;
                 bHaveDot=FALSE;
