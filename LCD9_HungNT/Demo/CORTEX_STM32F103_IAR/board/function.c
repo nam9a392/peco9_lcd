@@ -1557,6 +1557,7 @@ void fDisplay(u8 pcode,TypeSubCode_t tScode,TypeValue_t tValue,bool valueDbOrInt
           if((pcode==13)||(pcode==3))
           {
             dot = sConfiguration.DecimalPlace.UnitPrice;
+            Dots(0,dot,0);
             dot = 0;
           }
           if(pcode == 16){
