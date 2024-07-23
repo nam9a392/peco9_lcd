@@ -442,10 +442,12 @@ void LCD_DisplayAmount(double amount,u8 x1,u8 y1,u8 x2,u8 y2,bool bDisplay_DvTie
 
 bool PRESET_CheckValid(u32 value,u8 lengtp,bool AV)
 {
+  float fAomountLimit = 0;
+  fAomountLimit = 9999999 / pow(10,sConfiguration.DecimalPlace.Amount);
   /*check Amount*/
   if(AV==TRUE)
   {
-    if(( value >9999999) ||(value==0) || (lengtp > sConfiguration.DecimalPlace.Amount))//(value<sConfiguration.UnitPrice)
+    if(( value/pow(10,lengtp) > fAomountLimit) ||(value==0) || (lengtp > sConfiguration.DecimalPlace.Amount))//(value<sConfiguration.UnitPrice)
     {
       return FALSE;
     }
